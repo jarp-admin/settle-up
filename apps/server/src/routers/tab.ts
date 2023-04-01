@@ -3,18 +3,81 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { generatePaypalLink } from "../utils/payments";
 
 export const tabRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.tab.findMany();
-  }),
-  addOrCreate: publicProcedure
+  getTab: publicProcedure
     .input(
       z.object({
-        amount: z.number(),
+        user1ID: z.string(),
+        user2ID: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const tab = await ctx.prisma.tab.findFirst({
+        where: {
+          debtorID: input.user1ID,
+          creditorID: input.user2ID,
+        },
+      });
+
+      if (tab?.amount != 0) {
+        return tab?.amount;
+      } else {
+        const inverseTab = await ctx.prisma.tab.findFirst({
+          where: {
+            debtorID: input.user2ID,
+            creditorID: input.user1ID,
+          },
+        });
+        if (inverseTab?.amount == 0 || inverseTab?.amount == undefined) {
+          return 0;
+        }
+
+        return -inverseTab?.amount;
+      }
+    }),
+  getAllTabs: publicProcedure
+    .input(
+      z.object({
+        userID: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const iou = await ctx.prisma.tab.findMany({
+        where: {
+          debtorID: input.userID,
+        },
+      });
+
+      const uome = await ctx.prisma.tab.findMany({
+        where: {
+          creditorID: input.userID,
+        },
+      });
+
+      return { iOwe: iou, oweMe: uome };
+    }),
+  addToOrCreate: publicProcedure
+    .input(
+      z.object({
+        amount: z.number().positive().finite(),
         debtorID: z.string(),
         creditorID: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      let inverseTab = await ctx.prisma.tab.findFirst({
+        where: {
+          amount: input.amount,
+          debtorID: input.creditorID,
+          creditorID: input.debtorID,
+        },
+      });
+
+      let inverseAmount = inverseTab?.amount;
+      if (inverseAmount == undefined) {
+        inverseAmount = 0;
+      }
+
+      let tabAmount = 0;
       const tab = await ctx.prisma.tab.findFirst({
         where: {
           debtorID: input.debtorID,
@@ -22,57 +85,78 @@ export const tabRouter = createTRPCRouter({
         },
       });
 
+      if (input.amount > inverseAmount) {
+        tabAmount = input.amount - inverseAmount;
+        inverseAmount = 0;
+      } else if (input.amount < inverseAmount) {
+        tabAmount = 0;
+        inverseAmount = inverseAmount - input.amount;
+      } else {
+        tabAmount = 0;
+        inverseAmount = 0;
+      }
+
       if (!tab) {
         const createdTab = await ctx.prisma.tab.create({
           data: {
-            amount: input.amount,
+            amount: tabAmount,
             debtorID: input.debtorID,
             creditorID: input.creditorID,
           },
         });
 
+        const updatedInverseTab = await ctx.prisma.tab.updateMany({
+          where: {
+            debtorID: input.creditorID,
+            creditorID: input.debtorID,
+          },
+          data: {
+            amount: inverseAmount,
+          },
+        });
         return createdTab;
       }
 
-      const upsertTab = await ctx.prisma.tab.updateMany({
+      const updatedTab = await ctx.prisma.tab.updateMany({
         where: {
           debtorID: input.debtorID,
           creditorID: input.creditorID,
         },
         data: {
-          amount: { increment: input.amount },
+          amount: tabAmount,
         },
       });
 
-      return upsertTab;
+      const updatedInverseTab = await ctx.prisma.tab.updateMany({
+        where: {
+          debtorID: input.creditorID,
+          creditorID: input.debtorID,
+        },
+        data: {
+          amount: inverseAmount,
+        },
+      });
+
+      return updatedTab;
     }),
-  // settle: publicProcedure
-  //   .input(
-  //     z.object({
-  //       debtorID: z.string(),
-  //       creditorID: z.string(),
-  //     })
-  //   )
-  //   .query(async ({ input, ctx }) => {
-  //     const tab = await ctx.prisma.tab.findFirst({
-  //       where: {
-  //         debtorID: input.debtorID,
-  //         creditorID: input.creditorID,
-  //       },
-  //     });
+  clear: publicProcedure
+    .input(
+      z.object({
+        debtorID: z.string(),
+        creditorID: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const clearedTab = await ctx.prisma.tab.updateMany({
+        where: {
+          debtorID: input.debtorID,
+          creditorID: input.creditorID,
+        },
+        data: {
+          amount: 0,
+        },
+      });
 
-  //     const paymentAmount = tab?.amount;
-
-  //     const settledTab = await ctx.prisma.tab.updateMany({
-  //       where: {
-  //         debtorID: input.debtorID,
-  //         creditorID: input.creditorID,
-  //       },
-  //       data: {
-  //         settled: true,
-  //       },
-  //     });
-
-  //     return generatePaypalLink(paymentAmount, "GBP", )
-  //   }),
+      return clearedTab;
+    }),
 });
