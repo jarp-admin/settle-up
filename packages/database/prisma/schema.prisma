@@ -12,11 +12,14 @@ datasource db {
 }
 
 model User {
-  uuID      String @id @unique @default(cuid())
-  firstName String
-  lastName  String
-  debts     Tab[]  @relation("DebtorTab")
-  credits   Tab[]  @relation("CreditorTab")
+  uuID                 String        @id @unique @default(cuid())
+  firstName            String
+  lastName             String
+  email                String
+  debts                Tab[]         @relation("DebtorTab")
+  credits              Tab[]         @relation("CreditorTab")
+  debtorTransactions   Transaction[] @relation("DebtorTransaction")
+  creditorTransactions Transaction[] @relation("CreditorTransaction")
 
   @@index([uuID])
 }
@@ -26,11 +29,24 @@ model Tab {
   settled    Boolean @default(false)
   debtor     User    @relation("DebtorTab", fields: [debtorID], references: [uuID])
   creditor   User    @relation("CreditorTab", fields: [creditorID], references: [uuID])
-  debtorID   String // owes money     (from) @map("debtorId")
-  creditorID String // is owed money  (to) @map("creditorId")
+  debtorID   String // owes money     (from)
+  creditorID String // is owed money  (to)
 
   @@id([debtorID, creditorID])
   @@unique([debtorID, creditorID])
+  @@index([debtorID])
+  @@index([creditorID])
+}
+
+model Transaction {
+  transactionID String   @id @default(cuid())
+  amount        Float
+  date          DateTime @default(now())
+  debtor        User     @relation("DebtorTransaction", fields: [debtorID], references: [uuID])
+  creditor      User     @relation("CreditorTransaction", fields: [creditorID], references: [uuID])
+  debtorID      String // owes money     (from)
+  creditorID    String // is owed money  (to)
+
   @@index([debtorID])
   @@index([creditorID])
 }
