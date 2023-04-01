@@ -9,27 +9,25 @@ export const tabRouter = createTRPCRouter({
     .input(
       z.object({
         amount: z.number(),
-        debtorId: z.number(),
-        creditorId: z.number(),
+        debtorID: z.number(),
+        creditorID: z.number(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const upsertTab = await ctx.prisma.tab.upsert({
         where: {
-          debtorID: input.debtorId,
-          creditorID: input.creditorId,
+          debtorID: input.debtorID,
+          creditorID: input.creditorID,
+        },
+        create: {
+          amount: input.amount,
+          debtorID: input.debtorID,
+          creditorID: input.creditorID,
         },
         update: {
           amount: { increment: input.amount },
         },
-        create: {
-          amount: input.amount,
-          debtorID: input.debtorId,
-          creditorID: input.creditorId,
-        },
       });
-
-      await ctx.prisma.tab.save(upsertTab);
 
       return upsertTab;
     }),
