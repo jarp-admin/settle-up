@@ -25,7 +25,7 @@ let ioweu: Command = {
     let target = i.options.getUser("user");
     let overall_tab = -10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
     let payment = i.options.getString("payment");
-    let x = `Added ${payment} to ${i.user}'s tab with ${target} /n`;
+    let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;
     let Response = "";
     if (overall_tab > 0) {
       Response = x + `You owe ${target} ${overall_tab}`;
