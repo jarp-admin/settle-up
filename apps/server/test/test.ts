@@ -1,4 +1,4 @@
-import type { AppRouter } from "../src/root";
+import type { AppRouter } from "app-router";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import fetch from "cross-fetch";
