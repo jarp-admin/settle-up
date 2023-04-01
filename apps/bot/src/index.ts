@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import { z } from "zod";
 dotenv.config();
+
 let envSchema = z.object({
   TOKEN: z.string().nonempty(),
 });
