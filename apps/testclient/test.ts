@@ -16,8 +16,8 @@ const client = createTRPCProxyClient<AppRouter>({
 client.tabs.addOrCreate
   .mutate({
     amount: 1,
-    debtorID: 123,
-    creditorID: 234,
+    debtorID: "clfy8vhfd0000vgl44wziywjb",
+    creditorID: "clfy8vhfe0002vgl4bn7a94v2",
   })
   .then((bilbo) => {
     console.log(bilbo);
