@@ -1,4 +1,4 @@
-import type { AppRouter } from "../server/root";
+import type { AppRouter } from "../src/root";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import fetch from "cross-fetch";
@@ -11,11 +11,9 @@ const client = createTRPCProxyClient<AppRouter>({
   ],
   transformer: superjson,
 });
-client.tabs.addOrCreate
+client.tab.addToOrCreate
   .mutate({
     amount: 1,
-    debtorID: 123,
-    creditorID: 234,
     debtorID: "clfy8vhfd0000vgl44wziywjb",
     creditorID: "clfy8vhfe0002vgl4bn7a94v2",
   })

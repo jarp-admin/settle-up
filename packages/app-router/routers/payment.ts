@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { generatePaypalLink } from "../utils/payments";
 
-export const tabRouter = createTRPCRouter({
+export const paymentRouter = createTRPCRouter({
   getLink: publicProcedure
     .input(
       z.object({
