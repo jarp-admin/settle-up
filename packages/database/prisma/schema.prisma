@@ -12,23 +12,25 @@ datasource db {
 }
 
 model User {
-  uuID                 String        @id @unique @default(cuid())
-  firstName            String
-  lastName             String
-  email                String
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
   debts                Tab[]         @relation("DebtorTab")
   credits              Tab[]         @relation("CreditorTab")
   debtorTransactions   Transaction[] @relation("DebtorTransaction")
   creditorTransactions Transaction[] @relation("CreditorTransaction")
-
-  @@index([uuID])
 }
 
 model Tab {
   amount     Float
   settled    Boolean @default(false)
-  debtor     User    @relation("DebtorTab", fields: [debtorID], references: [uuID])
-  creditor   User    @relation("CreditorTab", fields: [creditorID], references: [uuID])
+  debtor     User    @relation("DebtorTab", fields: [debtorID], references: [id])
+  creditor   User    @relation("CreditorTab", fields: [creditorID], references: [id])
   debtorID   String // owes money     (from)
   creditorID String // is owed money  (to)
 
@@ -42,8 +44,8 @@ model Transaction {
   transactionID String   @id @default(cuid())
   amount        Float
   date          DateTime @default(now())
-  debtor        User     @relation("DebtorTransaction", fields: [debtorID], references: [uuID])
-  creditor      User     @relation("CreditorTransaction", fields: [creditorID], references: [uuID])
+  debtor        User     @relation("DebtorTransaction", fields: [debtorID], references: [id])
+  creditor      User     @relation("CreditorTransaction", fields: [creditorID], references: [id])
   debtorID      String // owes money     (from)
   creditorID    String // is owed money  (to)
 
@@ -53,7 +55,7 @@ model Transaction {
 
 // Necessary for Next auth
 model Account {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -65,7 +67,7 @@ model Account {
   scope             String?
   id_token          String? // @db.Text
   session_state     String?
-  user              AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -76,19 +78,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-}
-
-model AuthUser {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
 }
 
 model VerificationToken {
