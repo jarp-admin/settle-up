@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from "discord.js";
-import { Command } from "~/types";
+import { Command } from "../types";
 
 let display: Command = {
   command: new SlashCommandBuilder()
     .setName("display")
     .setDescription("Shows how much you owe someone")
     .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping")
+      option.setName("user").setDescription("user to ping").setRequired(true)
     ),
 
   handler: async (i) => {
