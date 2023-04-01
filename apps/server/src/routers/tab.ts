@@ -11,22 +11,27 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const tab1 = await ctx.prisma.tab.findFirst({
+      const tab = await ctx.prisma.tab.findFirst({
         where: {
-          debtorID: input.user2ID,
-          creditorID: input.user1ID,
+          debtorID: input.user1ID,
+          creditorID: input.user2ID,
         },
       });
 
-      if (tab1?.amount != 0) {
-        return tab1;
+      if (tab?.amount != 0) {
+        return tab?.amount;
       } else {
-        return await ctx.prisma.tab.findFirst({
+        const inverseTab = await ctx.prisma.tab.findFirst({
           where: {
             debtorID: input.user2ID,
             creditorID: input.user1ID,
           },
         });
+        if (inverseTab?.amount == 0 || inverseTab?.amount == undefined) {
+          return 0;
+        }
+
+        return -inverseTab?.amount;
       }
     }),
   getAllTabs: publicProcedure
@@ -53,7 +58,7 @@ export const tabRouter = createTRPCRouter({
   addToOrCreate: publicProcedure
     .input(
       z.object({
-        amount: z.number().positive(),
+        amount: z.number().positive().finite(),
         debtorID: z.string(),
         creditorID: z.string(),
       })
