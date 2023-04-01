@@ -14,7 +14,7 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const tab = await ctx.prisma.tab.findMany({
+      const tab = await ctx.prisma.tab.findFirst({
         where: {
           debtorID: input.debtorID,
           creditorID: input.creditorID,
