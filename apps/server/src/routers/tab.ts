@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { generatePaypalLink } from "../utils/payments";
-import { fetchInverse, fetchTab } from "../utils/fetchers";
 
 export const tabRouter = createTRPCRouter({
   getAll: publicProcedure.query(({ ctx }) => {
@@ -10,21 +9,39 @@ export const tabRouter = createTRPCRouter({
   addToOrCreate: publicProcedure
     .input(
       z.object({
-        amount: z.number(),
+        amount: z.number().positive(),
         debtorID: z.string(),
         creditorID: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      let inverseAmount = await fetchInverse(input, ctx);
-      const tab = await fetchTab(input, ctx);
+      let inverseTab = await ctx.prisma.tab.findFirst({
+        where: {
+          amount: input.amount,
+          debtorID: input.creditorID,
+          creditorID: input.debtorID,
+        },
+      });
+
+      let inverseAmount = inverseTab?.amount;
+      if (inverseAmount == undefined) {
+        inverseAmount = 0;
+      }
+
+      let tabAmount = 0;
+      const tab = await ctx.prisma.tab.findFirst({
+        where: {
+          debtorID: input.debtorID,
+          creditorID: input.creditorID,
+        },
+      });
 
       if (input.amount > inverseAmount) {
-        const tabAmount = input.amount - inverseAmount;
+        tabAmount = input.amount - inverseAmount;
         inverseAmount = 0;
       } else if (input.amount < inverseAmount) {
-        const tabAmount = 0;
-        let inverseAmount = inverseAmount - input.amount;
+        tabAmount = 0;
+        inverseAmount = inverseAmount - input.amount;
       } else {
         tabAmount = 0;
         inverseAmount = 0;
