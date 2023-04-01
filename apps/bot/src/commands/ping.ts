@@ -4,10 +4,14 @@ import { Command } from "../../types";
 let ping: Command = {
   command: new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Replies with Pong!"),
+    .setDescription("Replies with Pong!")
+    .addUserOption((option) =>
+      option.setName("user").setDescription("user to ping")
+    ),
 
   handler: async (i) => {
-    await i.reply("Pong!");
+    let target = i.options.getUser("user");
+    await i.reply({ content: `Pong! ${target}` });
   },
 };
 

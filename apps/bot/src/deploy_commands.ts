@@ -9,7 +9,7 @@ import { commands } from "./command_registry";
   let coms = [];
 
   for (let com of commands.values()) {
-    coms.push(com.command.toJSON());
+    coms.push(com.command.toJSON!());
   }
 
   const rest = new REST({ version: "10" }).setToken(
