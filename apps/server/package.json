@@ -12,7 +12,8 @@
     "@prisma/client": "^4.12.0",
     "superjson": "^1.12.2",
     "zod": "^3.21.4",
-    "database": "*"
+    "database": "*",
+    "trpc": "*"
   },
   "devDependencies": {
     "ts-node": "^10.9.1"
