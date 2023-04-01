@@ -1,7 +1,8 @@
-import type { AppRouter } from "../server/root";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import fetch from "cross-fetch";
+
+import { AppRouter } from "../../server/src/root";
 
 const client = createTRPCProxyClient<AppRouter>({
   links: [
