@@ -2,11 +2,12 @@ import { CacheType, ChatInputCommandInteraction, Collection } from "discord.js";
 import ping from "./commands/ping";
 import { Command } from "../types";
 import display from "./commands/display";
+import settleup from "./commands/settleup";
 
 export let commands = new Collection<string, Command>();
 
 // * register your commands here
-addCommands([ping, display]);
+addCommands([ping, display, settleup]);
 
 export async function handleCommand(i: ChatInputCommandInteraction<CacheType>) {
   const command = commands.get(i.commandName);
