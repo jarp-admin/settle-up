@@ -1,9 +1,19 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
 
-// You can use any variable name you like.
-// We use t to keep things simple.
-const t = initTRPC.create();
+export const createTRPCContext = async () => {
+  return {
+    prisma,
+  };
+};
 
-export const router = t.router;
-export const middleware = t.middleware;
+const t = initTRPC.context<typeof createTRPCContext>().create({
+  transformer: superjson,
+  errorFormatter({ shape }) {
+    return shape;
+  },
+});
+
+export const createTRPCRouter = t.router;
+
 export const publicProcedure = t.procedure;
