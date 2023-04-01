@@ -1,8 +1,8 @@
-import { CacheType, ChatInputCommandInteraction, Collection } from "discord.js";
-import ping from "./commands/ping";
-import { Command } from "../types";
+import { Collection, ChatInputCommandInteraction, CacheType } from "discord.js";
 import display from "./commands/display";
+import ping from "./commands/ping";
 import settleup from "./commands/settleup";
+import { Command } from "./types";
 
 export let commands = new Collection<string, Command>();
 
