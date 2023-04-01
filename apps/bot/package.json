@@ -1,0 +1,20 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev":"node ./build/index.js"
+  },
+  "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.8.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.3"
+  }
+}
