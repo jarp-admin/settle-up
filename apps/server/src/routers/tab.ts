@@ -58,7 +58,7 @@ export const tabRouter = createTRPCRouter({
   addToOrCreate: publicProcedure
     .input(
       z.object({
-        amount: z.number().positive(),
+        amount: z.number().positive().finite(),
         debtorID: z.string(),
         creditorID: z.string(),
       })
