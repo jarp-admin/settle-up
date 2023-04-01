@@ -9,8 +9,8 @@ export const tabRouter = createTRPCRouter({
     .input(
       z.object({
         amount: z.number(),
-        debtorID: z.number(),
-        creditorID: z.number(),
+        debtorID: z.string(),
+        creditorID: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
