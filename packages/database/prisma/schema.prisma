@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  uuID      Int    @id @default(autoincrement())
+  uuID      Int    @id @unique @default(autoincrement())
   firstName String
   lastName  String
   debts     Tab[]  @relation("DebtorTab")
@@ -30,6 +30,7 @@ model Tab {
   creditorID Int // is owed money  (to) @map("creditorId")
 
   @@id([debtorID, creditorID])
+  @@unique([debtorID, creditorID])
   @@index([debtorID])
   @@index([creditorID])
 }
