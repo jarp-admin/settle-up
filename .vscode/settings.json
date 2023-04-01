@@ -1,5 +1,6 @@
 {
   "material-icon-theme.folders.associations": {
-    "testclient": "test"
+    "testclient": "test",
+    "bot": "api"
   }
 }
