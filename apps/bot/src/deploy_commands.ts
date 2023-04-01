@@ -2,8 +2,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import { REST, Routes } from "discord.js";
+import { commands } from "./command_registry";
 
-import { commands } from "~/command_registry";
 
 (async () => {
   let coms = [];

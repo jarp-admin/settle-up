@@ -3,7 +3,7 @@ import { z } from "zod";
 dotenv.config();
 
 import { Client, Events, GatewayIntentBits } from "discord.js";
-import { handleCommand } from "~/command_registry";
+import { handleCommand } from "./command_registry";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],

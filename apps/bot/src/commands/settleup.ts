@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, Message, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../types";
+import { Command } from "../types";
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ let settleup: Command = {
         .setLabel(i.options.getUser("user")?.username || ""),
       new ButtonBuilder()
         .setCustomId("primary")
-        .setLabel( || ""),
+        .setLabel("a" || ""),
       new ButtonBuilder()
         .setCustomId("link")
         .setLabel("Payment Link")
