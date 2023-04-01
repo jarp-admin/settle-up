@@ -5,7 +5,8 @@
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "dev":"node ./build/index.js"
+    "dev": "node ./build/index.js",
+    "deploy": "node ./build/deploy_commands.js"
   },
   "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
   "license": "ISC",
