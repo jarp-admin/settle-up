@@ -6,6 +6,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { Command } from "../types";
+import { client } from "../trpc";
 
 let ioweu: Command = {
   command: new SlashCommandBuilder()
@@ -23,10 +24,38 @@ let ioweu: Command = {
 
   handler: async (i) => {
     let target = i.options.getUser("user");
-    let overall_tab = -10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
+    if (target == null) {
+      return;
+    }
+
+    const deptorId = await client.user.getUserId.query({
+      discordId: i.user.id,
+    });
+    if (deptorId == undefined) {
+      throw new Error("No deptor selected");
+    }
+
+    const creditorId = await client.user.getUserId.query({
+      discordId: target?.id,
+    });
+    if (creditorId == undefined) {
+      throw new Error("No creditor selected");
+    }
+
+    let overall_tab = await client.tab.getTab.query({
+      user1ID: deptorId,
+      user2ID: creditorId,
+    });
+    if (overall_tab == undefined) {
+      throw new Error("no iowethem available");
+    }
+
     let payment = i.options.getString("payment");
+
     let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;
+
     let Response = "";
+
     if (overall_tab > 0) {
       Response = x + `You owe ${target} ${overall_tab}`;
     } else if (overall_tab < 0) {
