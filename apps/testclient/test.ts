@@ -13,7 +13,7 @@ const client = createTRPCProxyClient<AppRouter>({
   transformer: superjson,
 });
 
-client.tabs.addOrCreate
+client.tab.addOrCreate
   .mutate({
     amount: 1,
     debtorID: "clfy8vhfd0000vgl44wziywjb",
