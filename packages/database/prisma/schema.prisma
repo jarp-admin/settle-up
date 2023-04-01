@@ -17,14 +17,19 @@ model User {
   lastName  String
   debts     Tab[]  @relation("DebtorTab")
   credits   Tab[]  @relation("CreditorTab")
+
+  @@index([uuID])
 }
 
 model Tab {
-  tabID      String  @id
   amount     Float
   settled    Boolean @default(false)
-  debtor     User    @relation("DebtorTab", fields: [debtorId], references: [uuID])
-  creditor   User    @relation("CreditorTab", fields: [creditorId], references: [uuID])
-  debtorId   Int
-  creditorId Int
+  debtor     User    @relation("DebtorTab", fields: [debtorID], references: [uuID])
+  creditor   User    @relation("CreditorTab", fields: [creditorID], references: [uuID])
+  debtorID   Int // owes money     (from) @map("debtorId")
+  creditorID Int // is owed money  (to) @map("creditorId")
+
+  @@id([debtorID, creditorID])
+  @@index([debtorID])
+  @@index([creditorID])
 }
