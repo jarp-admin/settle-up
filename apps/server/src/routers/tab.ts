@@ -3,9 +3,53 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { generatePaypalLink } from "../utils/payments";
 
 export const tabRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.tab.findMany();
-  }),
+  getTab: publicProcedure
+    .input(
+      z.object({
+        user1ID: z.string(),
+        user2ID: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const tab1 = await ctx.prisma.tab.findFirst({
+        where: {
+          debtorID: input.user2ID,
+          creditorID: input.user1ID,
+        },
+      });
+
+      if (tab1?.amount != 0) {
+        return tab1;
+      } else {
+        return await ctx.prisma.tab.findFirst({
+          where: {
+            debtorID: input.user2ID,
+            creditorID: input.user1ID,
+          },
+        });
+      }
+    }),
+  getAllTabs: publicProcedure
+    .input(
+      z.object({
+        userID: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const iou = await ctx.prisma.tab.findMany({
+        where: {
+          debtorID: input.userID,
+        },
+      });
+
+      const uome = await ctx.prisma.tab.findMany({
+        where: {
+          creditorID: input.userID,
+        },
+      });
+
+      return { iOwe: iou, oweMe: uome };
+    }),
   addToOrCreate: publicProcedure
     .input(
       z.object({
