@@ -1,4 +1,5 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
 
 export const createTRPCContext = async () => {
   return {
@@ -6,10 +7,13 @@ export const createTRPCContext = async () => {
   };
 };
 
-const t = initTRPC.create();
+const t = initTRPC.context<typeof createTRPCContext>().create({
+  transformer: superjson,
+  errorFormatter({ shape }) {
+    return shape;
+  },
+});
 
 export const createTRPCRouter = t.router;
-
-// export const middleware = t.middleware;
 
 export const publicProcedure = t.procedure;
