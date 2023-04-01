@@ -1,9 +1,13 @@
 {
-    "name": "database",
-    "dependencies": {
-      "@prisma/client": "latest"
-    },
-    "devDependencies": {
-      "prisma": "4.12.0"
-    }
+  "name": "database",
+  "dependencies": {
+    "@prisma/client": "latest"
+  },
+  "devDependencies": {
+    "prisma": "4.12.0"
+  },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate"
   }
+}
