@@ -1,9 +1,10 @@
 import * as dotenv from "dotenv";
+import { z } from "zod";
 dotenv.config();
 
 import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
-import path from "path";
 import fs from "fs";
+import path from "path";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
@@ -65,4 +66,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
   console.log(interaction);
 });
 
-client.login(process.env.TOKEN);
+let envSchema = z.object({
+  TOKEN: z.string().nonempty(),
+});
+
+let env = envSchema.parse(process.env);
+
+client.login(env.TOKEN);
