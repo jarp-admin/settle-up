@@ -23,15 +23,15 @@ let ioweu: Command = {
 
   handler: async (i) => {
     let target = i.options.getUser("user");
-    let amount = -10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
+    let overall_tab = -10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
     let payment = i.options.getString("payment");
     let x = `Added ${payment} to ${i.user}'s tab with ${target} /n`;
     let Response = "";
-    if (amount > 0) {
-      Response = x + `You owe ${target} ${amount}`;
-    } else if (amount < 0) {
-      amount = amount * -1;
-      Response = x + `${target} owes you ${amount}`;
+    if (overall_tab > 0) {
+      Response = x + `You owe ${target} ${overall_tab}`;
+    } else if (overall_tab < 0) {
+      overall_tab = overall_tab * -1;
+      Response = x + `${target} owes you ${overall_tab}`;
     } else {
       Response = x + `You and ${target} are squared up`;
     }
