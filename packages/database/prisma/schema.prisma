@@ -6,20 +6,25 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+  // relationMode = "prisma"
 }
 
 model User {
-  uuID String @id
+  uuID      Int    @id @default(autoincrement())
   firstName String
-  lastName String
+  lastName  String
+  debts     Tab[]  @relation("DebtorTab")
+  credits   Tab[]  @relation("CreditorTab")
 }
 
 model Tab {
-  tabID String @id
-  from String
-  to String
-  amount Float
-  settled Boolean
+  tabID      String  @id
+  amount     Float
+  settled    Boolean @default(false)
+  debtor     User    @relation("DebtorTab", fields: [debtorId], references: [uuID])
+  creditor   User    @relation("CreditorTab", fields: [creditorId], references: [uuID])
+  debtorId   Int
+  creditorId Int
 }
