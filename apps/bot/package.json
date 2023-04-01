@@ -5,7 +5,9 @@
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "node ./build/index.js",
+    "watch-build": "tsc --watch",
+    "watch-host": "nodemon ./build/index.js",
+    "dev": "conc npm:watch-*",
     "deploy": "node ./build/deploy_commands.js"
   },
   "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
@@ -16,6 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22",
     "typescript": "^5.0.3"
   }
 }

@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  uuID      Int    @id @unique @default(autoincrement())
+  uuID      String @id @unique @default(cuid())
   firstName String
   lastName  String
   debts     Tab[]  @relation("DebtorTab")
@@ -26,8 +26,8 @@ model Tab {
   settled    Boolean @default(false)
   debtor     User    @relation("DebtorTab", fields: [debtorID], references: [uuID])
   creditor   User    @relation("CreditorTab", fields: [creditorID], references: [uuID])
-  debtorID   Int // owes money     (from) @map("debtorId")
-  creditorID Int // is owed money  (to) @map("creditorId")
+  debtorID   String // owes money     (from) @map("debtorId")
+  creditorID String // is owed money  (to) @map("creditorId")
 
   @@id([debtorID, creditorID])
   @@unique([debtorID, creditorID])
