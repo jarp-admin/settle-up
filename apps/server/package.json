@@ -1,0 +1,15 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "",
+    "build": ""
+  },
+  "dependencies": {
+    "superjson": "^1.12.2",
+    "zod": "^3.21.4"
+  }
+}
