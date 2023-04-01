@@ -35,7 +35,7 @@ export async function handleCommand(i: ChatInputCommandInteraction<CacheType>) {
 }
 
 function addCommand(com: Command) {
-  commands.set(com.command.name, com);
+  commands.set(com.command.name!, com);
 }
 
 function addCommands(coms: Command[]) {
