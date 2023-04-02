@@ -67,17 +67,17 @@ let ioweu: Command = {
       throw new Error("no iowe available");
     }
 
-    let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;
+    let x = `Added £${payment} to ${i.user.username}'s tab with ${target.username}. `;
 
     let Response = "";
 
     if (overall_tab > 0) {
-      Response = x + `You owe ${target} ${overall_tab}`;
+      Response = x + `You owe ${target.username} £${overall_tab}`;
     } else if (overall_tab < 0) {
       overall_tab = overall_tab * -1;
-      Response = x + `${target} owes you ${overall_tab}`;
+      Response = x + `${target.username} owes you £${overall_tab}`;
     } else {
-      Response = x + `You and ${target} are squared up`;
+      Response = x + `You and ${target.username} are squared up`;
     }
     await i.reply({ content: Response });
   },

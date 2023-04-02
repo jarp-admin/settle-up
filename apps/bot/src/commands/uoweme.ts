@@ -67,7 +67,7 @@ let uoweme: Command = {
     );
 
     let msg = await i.reply({
-      content: `Hey ${payer}, ${recipient} wants you to pay £${payment_amount}. Is this OK?`,
+      content: `Hey ${payer}, ${recipient.username} wants you to pay £${payment_amount}. Is this OK?`,
       components: [button],
     });
 
@@ -97,15 +97,15 @@ let uoweme: Command = {
 
       //! call ash
 
-      let x = `Added ${payment_amount} to ${payer}'s tab with ${recipient}. `;
+      let x = `Added £${payment_amount} to ${payer.username}'s tab with ${recipient.username}. `;
       let Response = "";
       if (overall_tab > 0) {
-        Response = x + `You owe ${recipient} ${overall_tab}`;
+        Response = x + `You owe ${recipient.username} £${overall_tab}`;
       } else if (overall_tab < 0) {
         overall_tab = overall_tab * -1;
-        Response = x + `${recipient} owes you ${overall_tab}`;
+        Response = x + `${recipient.username} owes you £${overall_tab}`;
       } else {
-        Response = x + `You and ${recipient} are squared up`;
+        Response = x + `You and ${recipient.username} are squared up`;
       }
       await i.editReply({ content: Response, components: [] });
     });

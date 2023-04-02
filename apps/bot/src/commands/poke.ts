@@ -39,7 +39,7 @@ let poke: Command = {
     let Response = ``;
 
     if(overall_tab > 0){
-      Response = `${target} pay your tab of £${overall_tab} to ${sender.username}`;
+      Response = `${target?.username} pay your tab of £${overall_tab} to ${sender.username}`;
     }
     else{
       overall_tab = overall_tab * -1;
