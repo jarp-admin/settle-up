@@ -78,8 +78,6 @@ let settleup: Command = {
       .setTitle("Purchase link")
       .setURL(payment_link);
 
-    i.reply({ embeds: [Embed] });
-
     // if get iowethem > 0:
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -89,16 +87,13 @@ let settleup: Command = {
         .setStyle(ButtonStyle.Primary)
     );
 
-    // if iowethem = 0 and theyoweme > 0:
-    //  const Response =  `${target} owes you `/*amount of money, get them to pay you instead`*/
-    // else:
-    //  const Response =  `You and ${target} are squared up, you don't need to transfer money at the moment`
-    let res_msg = `${payer}, please pay ${Math.abs(
+    let res_msg = `${payer}, please pay £${Math.abs(
       whoOwes
     )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
     let msg = await i.reply({
       content: res_msg,
-      components: [button] /**/,
+      embeds: [Embed],
+      components: [button],
     });
 
     msg.createMessageComponentCollector().on("collect", async (i) => {
