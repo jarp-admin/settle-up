@@ -92,7 +92,7 @@ export const tabRouter = createTRPCRouter({
         if (!inverseTab) {
           const createdTab = await ctx.prisma.tab.create({
             data: {
-              amount: tabAmount,
+              amount: input.amount,
               debtorID: input.debtorID,
               creditorID: input.creditorID,
             },
@@ -138,7 +138,7 @@ export const tabRouter = createTRPCRouter({
             },
             data: {
               amount: {
-                increment: tabAmount,
+                increment: input.amount,
               },
             },
           });
