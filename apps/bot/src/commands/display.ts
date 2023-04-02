@@ -15,6 +15,7 @@ let display: Command = {
     if (target == null) {
       return;
     }
+    
 
     const deptorId = await client.user.getUserId.query({
       discordId: i.user.id,
