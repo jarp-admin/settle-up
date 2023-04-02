@@ -5,6 +5,8 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { Command } from "../types";
+import { client } from "../trpc";
+import { registerCustom } from "superjson";
 
 let uoweme: Command = {
   command: new SlashCommandBuilder()
@@ -43,6 +45,20 @@ let uoweme: Command = {
       return;
     }
 
+    const deptorId = await client.user.getUserId.query({
+      discordId: payer.id,
+    });
+    if (deptorId == undefined) {
+      throw new Error("No debtor selected");
+    }
+
+    const creditorId = await client.user.getUserId.query({
+      discordId: recipient.id,
+    });
+    if (creditorId == undefined) {
+      throw new Error("No creditor selected");
+    }
+
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(`payment_valid`)
@@ -67,7 +83,17 @@ let uoweme: Command = {
       await i.deferUpdate();
 
       await i.user.send("This is a DM!");
-      let overall_tab = 10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
+
+      let updatedTab = await client.tab.addToOrCreate.mutate({
+        amount: parseFloat(String(payment_amount)),
+        debtorID: deptorId,
+        creditorID: creditorId,
+      });
+      if (updatedTab == undefined) {
+        throw new Error("no cannot update tab");
+      }
+
+      let overall_tab = updatedTab; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
 
       //! call ash
 
