@@ -15,13 +15,12 @@ let display: Command = {
     if (target == null) {
       return;
     }
-    
 
-    const deptorId = await client.user.getUserId.query({
+    const debtorId = await client.user.getUserId.query({
       discordId: i.user.id,
     });
-    if (deptorId == undefined) {
-      throw new Error("No deptor selected");
+    if (debtorId == undefined) {
+      throw new Error("No debtor selected");
     }
 
     const creditorId = await client.user.getUserId.query({
@@ -32,7 +31,7 @@ let display: Command = {
     }
 
     const iowethem = await client.tab.getTab.query({
-      user1ID: deptorId,
+      user1ID: debtorId,
       user2ID: creditorId,
     });
     if (iowethem == undefined) {
