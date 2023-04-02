@@ -11,7 +11,7 @@ let poke: Command = {
 
   handler: async (i) => {
     let target = i.options.getUser("user");
-    await i.reply({ content: `${target} pay your tab to ${i.user.tag}` });
+    await i.reply({ content: `${target} pay your tab to ${i.user.username}` });
   },
 };
 
