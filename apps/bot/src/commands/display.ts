@@ -30,7 +30,7 @@ let display: Command = {
       throw new Error("No creditor selected");
     }
 
-    const iowethem = await client.tab.getTab.query({
+    let iowethem = await client.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
@@ -41,11 +41,12 @@ let display: Command = {
     let Response = "";
 
     if (iowethem > 0) {
-      Response = `You owe ${target} ${iowethem}`;
+      Response = `You owe ${target.username} £${iowethem}`;
     } else if (iowethem < 0) {
-      Response = `${target} owes you ${iowethem}`;
+      iowethem = iowethem * -1;
+      Response = `${target.username} owes you £${iowethem}`;
     } else {
-      Response = `You and ${target} are squared up`;
+      Response = `You and ${target.username} are squared up`;
     }
 
     await i.reply({ content: Response });
