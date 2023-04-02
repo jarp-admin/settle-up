@@ -29,10 +29,25 @@ let settleup: Command = {
         .setLabel(i.user.username || "")
         .setStyle(ButtonStyle.Primary)
     );
-    const exampleEmbed = new EmbedBuilder()
+    const Embed = new EmbedBuilder()
       .setColor(0x0099FF)
       .setTitle('Purchase link')
       .setURL('https://discord.js.org/') //set link here
+      .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+      .setDescription('Some description here')
+      .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+      .addFields(
+        { name: 'Regular field title', value: 'Some value here' },
+        { name: '\u200B', value: '\u200B' },
+        { name: 'Inline field title', value: 'Some value here', inline: true },
+        { name: 'Inline field title', value: 'Some value here', inline: true },
+      )
+      .addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
+      .setImage('https://i.imgur.com/AfFp7pu.png')
+      .setTimestamp()
+      .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+
+    i.reply({ embeds: [Embed] });
     // if get iowethem > 0:
     const Response = `You are going to pay ${target} `; /*amount of money`*/
 
