@@ -31,10 +31,10 @@ let poke: Command = {
     let Response = ``;
 
     if (overall_tab > 0) {
-      Response = `${target?.username} pay your tab of £${overall_tab} to ${sender.username}`;
+      Response = `${sender.username} you owe ${target?.username} £${overall_tab}`;
     } else {
       overall_tab = overall_tab * -1;
-      Response = `${sender.username} you owe ${target?.username} £${overall_tab}`;
+      Response = `${target?.username} pay your tab of £${overall_tab} to ${sender.username}`;
     }
 
     await i.reply({ content: Response });
