@@ -131,6 +131,7 @@ export const tabRouter = createTRPCRouter({
         }
       } else {
         if (!inverseAmount) {
+          console.log("hello");
           const createdTab = await ctx.prisma.tab.updateMany({
             where: {
               debtorID: input.debtorID,
