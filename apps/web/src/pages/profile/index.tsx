@@ -24,7 +24,7 @@ const profile: NextPage = () => {
         <div className="flex flex-row flex-wrap gap-10 items-end px-8 justify-center">
         <div className="form-control">
             <label className="label">
-                <span className="label-text">Your Email</span>
+                <span className="label-text">Your Paypal Account Email</span>
             </label>
             <label className="input-group">
                 <span className="text-slate-200 bg-slate-800">Email</span>
