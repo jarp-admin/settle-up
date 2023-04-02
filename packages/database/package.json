@@ -8,7 +8,8 @@
   },
   "scripts": {
     "db:generate": "prisma generate",
-    "db:push": "prisma db push --skip-generate"
+    "db:push": "prisma db push --skip-generate",
+    "build": "prisma generate"
   },
   "main": "./index.ts",
   "types": "./index.ts"
