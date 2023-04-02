@@ -1,6 +1,12 @@
-import { SlashCommandBuilder } from "discord.js";
+import {
+  CacheType,
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+  User,
+} from "discord.js";
 import { Command } from "../types";
 import { client } from "../trpc";
+import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let display: Command = {
   command: new SlashCommandBuilder()
@@ -16,19 +22,11 @@ let display: Command = {
       return;
     }
 
-    const debtorId = await client.user.getUserId.query({
-      discordId: i.user.id,
-    });
-    if (debtorId == undefined) {
-      throw new Error("No debtor selected");
-    }
-
-    const creditorId = await client.user.getUserId.query({
-      discordId: target?.id,
-    });
-    if (creditorId == undefined) {
-      throw new Error("No creditor selected");
-    }
+    const { debtorId, creditorId } = await getDebtorCreditorIds(
+      client,
+      i,
+      target
+    );
 
     let iowethem = await client.tab.getTab.query({
       user1ID: debtorId,

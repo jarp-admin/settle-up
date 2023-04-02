@@ -9,6 +9,7 @@ import {
 import { Command } from "../types";
 const { EmbedBuilder } = require("discord.js");
 import { client } from "../trpc";
+import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -30,19 +31,11 @@ let settleup: Command = {
       return;
     }
 
-    const debtorId = await client.user.getUserId.query({
-      discordId: debtor.id,
-    });
-    if (debtorId == undefined) {
-      throw new Error("No deptor selected");
-    }
-
-    const creditorId = await client.user.getUserId.query({
-      discordId: creditor?.id,
-    });
-    if (creditorId == undefined) {
-      throw new Error("No creditor selected");
-    }
+    const { debtorId, creditorId } = await getDebtorCreditorIds(
+      client,
+      i,
+      target
+    );
 
     if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
