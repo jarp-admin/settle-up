@@ -114,7 +114,7 @@ export const tabRouter = createTRPCRouter({
             amount: inverseAmount,
           },
         });
-        return createdTab;
+        return createdTab.amount;
       }
 
       const updatedTab = await ctx.prisma.tab.updateMany({
@@ -137,7 +137,7 @@ export const tabRouter = createTRPCRouter({
         },
       });
 
-      return updatedTab;
+      return tabAmount;
     }),
   clear: publicProcedure
     .input(

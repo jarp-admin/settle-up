@@ -23,6 +23,10 @@ let ioweu: Command = {
     ),
 
   handler: async (i) => {
+    let payment = i.options.getString("payment");
+    if (payment == null) {
+      return;
+    }
     let target = i.options.getUser("user");
     if (target == null) {
       return;
@@ -42,15 +46,14 @@ let ioweu: Command = {
       throw new Error("No creditor selected");
     }
 
-    let overall_tab = await client.tab.getTab.query({
-      user1ID: deptorId,
-      user2ID: creditorId,
+    let overall_tab = await client.tab.addToOrCreate.mutate({
+      amount: parseFloat(payment),
+      debtorID: deptorId,
+      creditorID: creditorId,
     });
     if (overall_tab == undefined) {
       throw new Error("no iowethem available");
     }
-
-    let payment = i.options.getString("payment");
 
     let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;
 
