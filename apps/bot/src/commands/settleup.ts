@@ -75,7 +75,6 @@ let settleup: Command = {
       .setTitle("Purchase link")
       .setURL(payment_link);
 
-    // if get iowethem > 0:
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -109,7 +108,7 @@ let settleup: Command = {
         creditorID: creditorId,
       });
 
-      await i.editReply({ content: res_msg, components: [] });
+      await i.editReply({ components: [] });
       await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
     });
   },
