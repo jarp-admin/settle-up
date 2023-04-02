@@ -23,7 +23,6 @@ let display: Command = {
     }
 
     const { debtorId, creditorId } = await getDebtorCreditorIds(
-      client,
       i,
       target
     );

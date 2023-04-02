@@ -1,5 +1,6 @@
+import { client } from "../trpc";
+
 export const getDebtorCreditorIds = async (
-  client: any,
   i: any,
   target: any
 ) => {

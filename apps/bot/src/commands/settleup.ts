@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { Command } from "../types";
 const { EmbedBuilder } = require("discord.js");
-import { client } from "../trpc";
+import { client as trpc} from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let settleup: Command = {
@@ -20,10 +20,10 @@ let settleup: Command = {
     ),
 
   handler: async (i) => {
-    let debtor = i.user;
-    let creditor = i.options.getUser("user");
+    let client = i.user;
+    let target = i.options.getUser("user");
 
-    if (creditor == null) {
+    if (target == null) {
       i.reply({
         content: "You must specify who you want to settle your tab with.",
         ephemeral: true,
@@ -32,7 +32,6 @@ let settleup: Command = {
     }
 
     const { debtorId, creditorId } = await getDebtorCreditorIds(
-      client,
       i,
       target
     );
@@ -41,7 +40,7 @@ let settleup: Command = {
       throw new Error("Debtor and Creditor are the same");
     }
 
-    const whoOwes = await client.tab.getTab.query({
+    const whoOwes = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
@@ -55,16 +54,16 @@ let settleup: Command = {
     }
 
     let payment_link;
-    let payer = whoOwes > 0 ? debtor : creditor;
-    let receiver = whoOwes > 0 ? creditor : debtor;
+    let payer = whoOwes > 0 ? client : target;
+    let receiver = whoOwes > 0 ? target : client;
 
     if (whoOwes > 0) {
-      payment_link = await client.payment.getLink.query({
+      payment_link = await trpc.payment.getLink.query({
         debtorID: debtorId,
         creditorID: creditorId,
       });
     } else {
-      payment_link = await client.payment.getLink.query({
+      payment_link = await trpc.payment.getLink.query({
         debtorID: creditorId,
         creditorID: debtorId,
       });
