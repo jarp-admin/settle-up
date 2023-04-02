@@ -7,6 +7,9 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { Command } from "../types";
+const { EmbedBuilder } = require("discord.js");
+import { client } from "../trpc";
+import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -17,36 +20,101 @@ let settleup: Command = {
     ),
 
   handler: async (i) => {
-    let target = i.options.getUser("user");
+    let debtor = i.user;
+    let creditor = i.options.getUser("user");
+
+    if (creditor == null) {
+      i.reply({
+        content: "You must specify who you want to settle your tab with.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const { debtorId, creditorId } = await getDebtorCreditorIds(
+      client,
+      i,
+      target
+    );
+
+    if (debtorId == creditorId) {
+      throw new Error("Debtor and Creditor are the same");
+    }
+
+    const whoOwes = await client.tab.getTab.query({
+      user1ID: debtorId,
+      user2ID: creditorId,
+    });
+
+    if (whoOwes == undefined) {
+      i.reply({
+        content: "Neither of you owe each other any money",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    let payment_link;
+    let payer = whoOwes > 0 ? debtor : creditor;
+    let receiver = whoOwes > 0 ? creditor : debtor;
+
+    if (whoOwes > 0) {
+      payment_link = await client.payment.getLink.query({
+        debtorID: debtorId,
+        creditorID: creditorId,
+      });
+    } else {
+      payment_link = await client.payment.getLink.query({
+        debtorID: creditorId,
+        creditorID: debtorId,
+      });
+    }
+
+    if (payment_link == undefined) {
+      throw new Error("no payment link available");
+    }
+
+    const Embed = new EmbedBuilder()
+      .setColor(0x0099ff)
+      .setTitle("Purchase link")
+      .setURL(payment_link);
+
+    i.reply({ embeds: [Embed] });
+
+    // if get iowethem > 0:
+
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId("User 1")
-        .setLabel(i.options.getUser("user")?.username || "")
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("User 2")
-        .setLabel(i.user.tag || "")
-        .setStyle(ButtonStyle.Primary) /*,
-      new ButtonBuilder()
-        .setCustomId("link")
-        .setLabel("Payment Link")
-        .setStyle(ButtonStyle.Link)//*/
+        .setCustomId("payment_confirmation")
+        .setLabel("Received")
+        .setStyle(ButtonStyle.Primary)
     );
-    // if get iowethem > 0:
-    const Response = `You are going to pay ${target} `; /*amount of money`*/
+
     // if iowethem = 0 and theyoweme > 0:
     //  const Response =  `${target} owes you `/*amount of money, get them to pay you instead`*/
     // else:
     //  const Response =  `You and ${target} are squared up, you don't need to transfer money at the moment`
+    let res_msg = `${payer}, please pay ${Math.abs(
+      whoOwes
+    )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
     let msg = await i.reply({
-      content:
-        Response +
-        " select the button with your name once you have confirmed the transaction, payee use the link to access the payment",
+      content: res_msg,
       components: [button] /**/,
     });
 
     msg.createMessageComponentCollector().on("collect", async (i) => {
-      i.reply("yes");
+      if (i.user != receiver) {
+        await i.reply({
+          content: "Only the payer can accept the payment",
+          ephemeral: true,
+        });
+        return;
+      }
+
+      await i.deferUpdate();
+
+      await i.editReply({ content: res_msg, components: [] });
+      await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
     });
   },
 };

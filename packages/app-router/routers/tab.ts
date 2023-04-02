@@ -84,7 +84,6 @@ export const tabRouter = createTRPCRouter({
 
       if (!tab) {
         if (!inverseTab) {
-          console.log("hello1");
           const createdTab = await ctx.prisma.tab.create({
             data: {
               amount: input.amount,
@@ -94,7 +93,6 @@ export const tabRouter = createTRPCRouter({
           });
           return createdTab.amount;
         } else {
-          console.log("hello2");
           if (input.amount > inverseAmount!) {
             tabAmount = input.amount - inverseAmount!;
             inverseAmount = 0;
@@ -127,7 +125,6 @@ export const tabRouter = createTRPCRouter({
         }
       } else {
         if (!inverseAmount) {
-          console.log("hello3");
           const createdTab = await ctx.prisma.tab.updateMany({
             where: {
               debtorID: input.debtorID,
@@ -148,7 +145,6 @@ export const tabRouter = createTRPCRouter({
           });
           return updatedTab?.amount;
         } else {
-          console.log("hello4");
           if (tab.amount + input.amount > inverseAmount) {
             tabAmount = tab.amount + input.amount - inverseAmount;
             inverseAmount = 0;
