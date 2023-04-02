@@ -36,7 +36,7 @@ let ioweu: Command = {
       discordId: i.user.id,
     });
     if (deptorId == undefined) {
-      throw new Error("No deptor selected");
+      throw new Error("No debtor selected");
     }
 
     const creditorId = await client.user.getUserId.query({
@@ -46,7 +46,7 @@ let ioweu: Command = {
       throw new Error("No creditor selected");
     }
 
-    if(deptorId == creditorId){
+    if (deptorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
     }
 

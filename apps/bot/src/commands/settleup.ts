@@ -7,7 +7,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { Command } from "../types";
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require("discord.js");
 import { client } from "../trpc";
 
 let settleup: Command = {
@@ -19,99 +19,109 @@ let settleup: Command = {
     ),
 
   handler: async (i) => {
-    let target = i.options.getUser("user");
-    if (target == null) {
+    let debtor = i.user;
+    let creditor = i.options.getUser("user");
+
+    if (creditor == null) {
+      i.reply({
+        content: "You must specify who you want to settle your tab with.",
+        ephemeral: true,
+      });
       return;
     }
-    let test = i.user.username;
-    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId("User 1")
-        .setLabel(target?.username || "")
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId("User 2")
-        .setLabel(test || "")
-        .setStyle(ButtonStyle.Primary)
-    );
 
-    const deptorId = await client.user.getUserId.query({
-      discordId: i.user.id,
+    const debtorId = await client.user.getUserId.query({
+      discordId: debtor.id,
     });
-    if (deptorId == undefined) {
+    if (debtorId == undefined) {
       throw new Error("No deptor selected");
     }
 
     const creditorId = await client.user.getUserId.query({
-      discordId: target?.id,
+      discordId: creditor?.id,
     });
     if (creditorId == undefined) {
       throw new Error("No creditor selected");
     }
 
-    if(deptorId == creditorId){
+    if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
     }
 
-    const whoowes = await client.tab.getTab.query({
-      user1ID: deptorId,
+    const whoOwes = await client.tab.getTab.query({
+      user1ID: debtorId,
       user2ID: creditorId,
     });
-    if (whoowes == undefined) {
-      throw new Error("no iowethem available");
+
+    if (whoOwes == undefined) {
+      i.reply({
+        content: "Neither of you owe each other any money",
+        ephemeral: true,
+      });
+      return;
     }
 
     let payment_link;
+    let payer = whoOwes > 0 ? debtor : creditor;
+    let receiver = whoOwes > 0 ? creditor : debtor;
 
-    if(whoowes > 0){
+    if (whoOwes > 0) {
       payment_link = await client.payment.getLink.query({
-        debtorID: deptorId,
+        debtorID: debtorId,
         creditorID: creditorId,
       });
-    }
-    else {
+    } else {
       payment_link = await client.payment.getLink.query({
         debtorID: creditorId,
-        creditorID: deptorId,
+        creditorID: debtorId,
       });
     }
 
-    
     if (payment_link == undefined) {
       throw new Error("no payment link available");
     }
 
-
     const Embed = new EmbedBuilder()
-      .setColor(0x0099FF)
-      .setTitle('Purchase link')
+      .setColor(0x0099ff)
+      .setTitle("Purchase link")
       .setURL(payment_link);
 
     i.reply({ embeds: [Embed] });
+
     // if get iowethem > 0:
-    const Response = `You are going to pay ${target} `; /*amount of money`*/
 
-    
-
-    let response_it = [0, 0]
+    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("payment_confirmation")
+        .setLabel("Received")
+        .setStyle(ButtonStyle.Primary)
+    );
 
     // if iowethem = 0 and theyoweme > 0:
     //  const Response =  `${target} owes you `/*amount of money, get them to pay you instead`*/
     // else:
     //  const Response =  `You and ${target} are squared up, you don't need to transfer money at the moment`
+    let res_msg = `${payer}, please pay ${Math.abs(
+      whoOwes
+    )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
     let msg = await i.reply({
-      content:
-        Response +
-        " select the button with your name once you have confirmed the transaction, payee use the link to access the payment",
+      content: res_msg,
       components: [button] /**/,
     });
 
-    // (embeds: exampleEmbed)
-    
     msg.createMessageComponentCollector().on("collect", async (i) => {
-      await i.reply(i.id);
+      if (i.user != receiver) {
+        await i.reply({
+          content: "Only the payer can accept the payment",
+          ephemeral: true,
+        });
+        return;
+      }
 
-      let x = 0;
+      await i.deferUpdate();
+
+      await i.editReply({ content: res_msg, components: [] });
+      await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
     });
   },
 };
