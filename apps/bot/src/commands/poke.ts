@@ -34,7 +34,7 @@ let poke: Command = {
       Response = `${sender.username} you owe ${target?.username} £${overall_tab}`;
     } else {
       overall_tab = overall_tab * -1;
-      Response = `${target?.username} pay your tab of £${overall_tab} to ${sender.username}`;
+      Response = `${target} pay your tab of £${overall_tab} to ${sender.username}`;
     }
 
     await i.reply({ content: Response });
