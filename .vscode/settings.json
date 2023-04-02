@@ -1,6 +1,7 @@
 {
   "material-icon-theme.folders.associations": {
     "testclient": "test",
-    "bot": "api"
+    "bot": "api",
+    "app-router": "api"
   }
 }

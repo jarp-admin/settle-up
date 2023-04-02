@@ -14,6 +14,8 @@
     "@prisma/client": "^4.11.0",
     "daisyui": "^2.51.5",
     "database": "*",
+    "app-router": "*",
+    "cross-fetch": "^3.1.5",
     "next": "^13.2.4",
     "next-auth": "^4.20.1",
     "react": "18.2.0",

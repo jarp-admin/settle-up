@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",
-    "superjson": "^1.12.2",
-    "zod": "^3.21.4",
+    "cors": "^2.8.5",
     "database": "*",
-    "trpc": "*"
+    "superjson": "^1.12.2",
+    "trpc": "*",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.13",
     "ts-node": "^10.9.1"
   }
 }
