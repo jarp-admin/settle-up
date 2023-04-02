@@ -2,6 +2,7 @@ import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import type { FC } from "react";
+import SignIn from "./SignIn";
 
 const Profile: FC = () => {
   let { data: session } = useSession();
@@ -11,15 +12,16 @@ const Profile: FC = () => {
     <>
       {user ? (
         <Link href="/profile">
-          <Image
+          <img
+            className="rounded-full object-cover object-center"
             alt="Profile Picture"
-            width={100}
-            height={100}
+            width={60}
+            height={60}
             src={user.image || "/default.jpg"}
           />
         </Link>
       ) : (
-        <button onClick={() => signIn()}>log in</button>
+        <SignIn />
       )}
     </>
   );

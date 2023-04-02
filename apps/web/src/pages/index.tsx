@@ -10,8 +10,8 @@ const Home: NextPage = () => {
         <meta name="description" content="Discord Accountant Bot Dashboard" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="">
-        <h1>Booking done right</h1>
+      <div className="absolute top-20">
+        <h1 className="bg-slate-100/80">Booking done right</h1>
         <section>
           <h2>Features:</h2>
           <ul>
@@ -22,7 +22,7 @@ const Home: NextPage = () => {
           </ul>
         </section>
         <Link href="/">Invite to your discord server</Link>
-      </main>
+      </div>
     </>
   );
 };
