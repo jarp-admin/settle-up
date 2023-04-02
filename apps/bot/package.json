@@ -8,7 +8,7 @@
     "watch-build": "tsc --watch",
     "watch-host": "nodemon ./dist/index.js",
     "dev": "conc npm:watch-*",
-    "deploy": "node ./build/deploy_commands.js"
+    "deploy": "node ./dist/deploy_commands.js"
   },
   "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
   "license": "ISC",

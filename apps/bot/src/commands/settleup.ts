@@ -8,6 +8,7 @@ import {
 } from "discord.js";
 import { Command } from "../types";
 const { EmbedBuilder } = require('discord.js');
+import { client } from "../trpc";
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -19,33 +20,72 @@ let settleup: Command = {
 
   handler: async (i) => {
     let target = i.options.getUser("user");
+    if (target == null) {
+      return;
+    }
+    let test = i.user.username;
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId("User 1")
-        .setLabel(i.options.getUser("user")?.username || "")
+        .setLabel(target?.username || "")
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId("User 2")
-        .setLabel(i.user.username || "")
+        .setLabel(test || "")
         .setStyle(ButtonStyle.Primary)
     );
+
+    const deptorId = await client.user.getUserId.query({
+      discordId: i.user.id,
+    });
+    if (deptorId == undefined) {
+      throw new Error("No deptor selected");
+    }
+
+    const creditorId = await client.user.getUserId.query({
+      discordId: target?.id,
+    });
+    if (creditorId == undefined) {
+      throw new Error("No creditor selected");
+    }
+
+    if(deptorId == creditorId){
+      throw new Error("Debtor and Creditor are the same");
+    }
+
+    const whoowes = await client.tab.getTab.query({
+      user1ID: deptorId,
+      user2ID: creditorId,
+    });
+    if (whoowes == undefined) {
+      throw new Error("no iowethem available");
+    }
+
+    let payment_link;
+
+    if(whoowes > 0){
+      payment_link = await client.payment.getLink.query({
+        debtorID: deptorId,
+        creditorID: creditorId,
+      });
+    }
+    else {
+      payment_link = await client.payment.getLink.query({
+        debtorID: creditorId,
+        creditorID: deptorId,
+      });
+    }
+
+    
+    if (payment_link == undefined) {
+      throw new Error("no payment link available");
+    }
+
+
     const Embed = new EmbedBuilder()
       .setColor(0x0099FF)
       .setTitle('Purchase link')
-      .setURL('https://discord.js.org/') //set link here
-      .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-      .setDescription('Some description here')
-      .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-      .addFields(
-        { name: 'Regular field title', value: 'Some value here' },
-        { name: '\u200B', value: '\u200B' },
-        { name: 'Inline field title', value: 'Some value here', inline: true },
-        { name: 'Inline field title', value: 'Some value here', inline: true },
-      )
-      .addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
-      .setImage('https://i.imgur.com/AfFp7pu.png')
-      .setTimestamp()
-      .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+      .setURL(payment_link);
 
     i.reply({ embeds: [Embed] });
     // if get iowethem > 0:
