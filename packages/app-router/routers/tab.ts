@@ -85,18 +85,18 @@ export const tabRouter = createTRPCRouter({
         },
       });
 
-      if (input.amount > inverseAmount) {
-        tabAmount = input.amount - inverseAmount;
-        inverseAmount = 0;
-      } else if (input.amount < inverseAmount) {
-        tabAmount = 0;
-        inverseAmount = inverseAmount - input.amount;
-      } else {
-        tabAmount = 0;
-        inverseAmount = 0;
-      }
-
       if (!tab) {
+        if (input.amount > inverseAmount) {
+          tabAmount = input.amount - inverseAmount;
+          inverseAmount = 0;
+        } else if (input.amount < inverseAmount) {
+          tabAmount = 0;
+          inverseAmount = inverseAmount - input.amount;
+        } else {
+          tabAmount = 0;
+          inverseAmount = 0;
+        }
+
         const createdTab = await ctx.prisma.tab.create({
           data: {
             amount: tabAmount,
@@ -115,6 +115,17 @@ export const tabRouter = createTRPCRouter({
           },
         });
         return createdTab.amount;
+      }
+
+      if (tab.amount + input.amount > inverseAmount) {
+        tabAmount = tab.amount + input.amount - inverseAmount;
+        inverseAmount = 0;
+      } else if (tab.amount + input.amount < inverseAmount) {
+        tabAmount = 0;
+        inverseAmount = inverseAmount - (tab.amount + input.amount);
+      } else {
+        tabAmount = 0;
+        inverseAmount = 0;
       }
 
       const updatedTab = await ctx.prisma.tab.updateMany({
