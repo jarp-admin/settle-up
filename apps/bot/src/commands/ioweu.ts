@@ -34,7 +34,6 @@ let ioweu: Command = {
     }
 
     const { debtorId, creditorId } = await getDebtorCreditorIds(
-      client,
       i,
       target
     );

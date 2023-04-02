@@ -16,7 +16,6 @@ let poke: Command = {
     let sender = i.user;
 
     const { debtorId, creditorId } = await getDebtorCreditorIds(
-      client,
       i,
       target
     );

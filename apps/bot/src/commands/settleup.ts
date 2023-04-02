@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { Command } from "../types";
 const { EmbedBuilder } = require("discord.js");
-import { client } from "../trpc";
+import { client as trpc } from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let settleup: Command = {
@@ -20,10 +20,10 @@ let settleup: Command = {
     ),
 
   handler: async (i) => {
-    let debtor = i.user;
-    let creditor = i.options.getUser("user");
+    let client = i.user;
+    let target = i.options.getUser("user");
 
-    if (creditor == null) {
+    if (target == null) {
       i.reply({
         content: "You must specify who you want to settle your tab with.",
         ephemeral: true,
@@ -31,17 +31,13 @@ let settleup: Command = {
       return;
     }
 
-    const { debtorId, creditorId } = await getDebtorCreditorIds(
-      client,
-      i,
-      target
-    );
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
     if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
     }
 
-    const whoOwes = await client.tab.getTab.query({
+    const whoOwes = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
@@ -55,16 +51,16 @@ let settleup: Command = {
     }
 
     let payment_link;
-    let payer = whoOwes > 0 ? debtor : creditor;
-    let receiver = whoOwes > 0 ? creditor : debtor;
+    let payer = whoOwes > 0 ? client : target;
+    let receiver = whoOwes > 0 ? target : client;
 
     if (whoOwes > 0) {
-      payment_link = await client.payment.getLink.query({
+      payment_link = await trpc.payment.getLink.query({
         debtorID: debtorId,
         creditorID: creditorId,
       });
     } else {
-      payment_link = await client.payment.getLink.query({
+      payment_link = await trpc.payment.getLink.query({
         debtorID: creditorId,
         creditorID: debtorId,
       });
@@ -79,9 +75,6 @@ let settleup: Command = {
       .setTitle("Purchase link")
       .setURL(payment_link);
 
-    i.reply({ embeds: [Embed] });
-
-    // if get iowethem > 0:
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -90,16 +83,13 @@ let settleup: Command = {
         .setStyle(ButtonStyle.Primary)
     );
 
-    // if iowethem = 0 and theyoweme > 0:
-    //  const Response =  `${target} owes you `/*amount of money, get them to pay you instead`*/
-    // else:
-    //  const Response =  `You and ${target} are squared up, you don't need to transfer money at the moment`
-    let res_msg = `${payer}, please pay ${Math.abs(
+    let res_msg = `${payer}, please pay £${Math.abs(
       whoOwes
     )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
     let msg = await i.reply({
       content: res_msg,
-      components: [button] /**/,
+      embeds: [Embed],
+      components: [button],
     });
 
     msg.createMessageComponentCollector().on("collect", async (i) => {
@@ -113,7 +103,12 @@ let settleup: Command = {
 
       await i.deferUpdate();
 
-      await i.editReply({ content: res_msg, components: [] });
+      const clearedTab = await trpc.tab.clear.mutate({
+        debtorID: debtorId,
+        creditorID: creditorId,
+      });
+
+      await i.editReply({ components: [] });
       await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
     });
   },

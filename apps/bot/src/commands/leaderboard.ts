@@ -7,39 +7,43 @@ import { client } from "../trpc";
 
 let leaderboard: Command = {
   command: new SlashCommandBuilder()
-    .setName("mostdebt")
+    .setName("leaderboard")
     .setDescription("Shows the leaderboard for who owns the most debt")
     .addStringOption((option) =>
       option
         .setName("leaderboardtype")
-        .setDescription("leaderboard to display")
+        .setDescription("Leaderboard to display, type either \"Credit\" or \"Debt\"")
         .setRequired(true)
-        .addChoices(
-          "Dept" as unknown as APIApplicationCommandOptionChoice<string>
-        )
-        .addChoices(
-          "Credit" as unknown as APIApplicationCommandOptionChoice<string>
-        )
     ),
 
   handler: async (i) => {
+    // await i.reply({content: "Do you want the \"Credit\" or \"Debt\" leaderboard?"})
     let leaderboardtype = i.options.getString("leaderboardtype");
     if (leaderboardtype == null) {
       return;
     }
 
-    if (leaderboardtype == "Dept") {
+    let leaderboard;
+    if (leaderboardtype == "Debt") {
       console.log("hello from debt");
+      leaderboard = await client.leaderboard.getDebtHistory.query();
     }
-
-    if (leaderboardtype == "Credit") {
+    else if (leaderboardtype == "Credit") {
       console.log("hello from credit");
+      leaderboard = await client.leaderboard.getMostCredited.query();
+    }
+    else{
+      await i.reply({content: "No leaderboard specified, please type either \"Credit\" or \"Debt\""});
+      return;
     }
 
-    const leaderboard = await client.leaderboard.getMostDebt.query();
+    
     if (leaderboard == undefined) {
-      throw new Error("Cannot get leaderboard");
+      await i.reply({content: "No leaderboard found"});
+      return;
     }
+
+
 
     let Response = "";
     console.log(leaderboard);
