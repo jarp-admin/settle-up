@@ -18,7 +18,8 @@ export const leaderboardRouter = createTRPCRouter({
       return acc;
     }, new Map<string, number>());
 
-    return new Map([...userDebtMap.entries()].sort((a, b) => a[1] - b[1]));
+    let x = [...userDebtMap.entries()].sort((a, b) => b[1] - a[1]);
+    return x;
   }),
 
   getMostCredited: publicProcedure.query(async ({ ctx }) => {

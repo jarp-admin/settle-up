@@ -24,7 +24,7 @@ const Profile: FC = () => {
   </label>
   <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-slate-800 rounded-box w-52">
     <li><Link href="/profile">Profile</Link></li>
-    <li><Link href="/my-stats">My Stats</Link></li>
+    <li><Link href="/leaderboard">Leaderboard</Link></li>
   </ul>
 </div>
 
