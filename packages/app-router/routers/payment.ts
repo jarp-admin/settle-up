@@ -29,7 +29,10 @@ export const paymentRouter = createTRPCRouter({
         },
       });
 
-      paypalEmail = user.paypalEmail;
+      const paypalEmail = user?.paypalEmail;
+      if (!paypalEmail) {
+        return;
+      }
 
       const settledTab = await ctx.prisma.tab.updateMany({
         where: {
