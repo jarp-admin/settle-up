@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Graph from "~/components/Graph";
 
 const Home: NextPage = () => {
   return (
@@ -22,6 +23,13 @@ const Home: NextPage = () => {
           </ul>
         </section>
         <Link href="/">Invite to your discord server</Link>
+        <div>
+          <Graph
+            data={[
+              10, 10, 10, 15, 15, 15, 6, 6, 0, 0, 12, 12, 17, 17, 17, 17, 0,
+            ]}
+          />
+        </div>
       </div>
     </>
   );

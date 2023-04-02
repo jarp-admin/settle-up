@@ -16,14 +16,15 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified DateTime?
+  paypalEmail   String?
   image         String?
   accounts      Account[]
   sessions      Session[]
 
-  debts                Tab[]         @relation("DebtorTab")
-  credits              Tab[]         @relation("CreditorTab")
-  debtorTransactions   Transaction[] @relation("DebtorTransaction")
-  creditorTransactions Transaction[] @relation("CreditorTransaction")
+  debts             Tab[]       @relation("DebtorTab")
+  credits           Tab[]       @relation("CreditorTab")
+  debtorTabAction   TabAction[] @relation("DebtorTabAction")
+  creditorTabAction TabAction[] @relation("CreditorTabAction")
 }
 
 model Tab {
@@ -40,17 +41,18 @@ model Tab {
   @@index([creditorID])
 }
 
-model Transaction {
-  transactionID String   @id @default(cuid())
-  amount        Float
-  date          DateTime @default(now())
-  debtor        User     @relation("DebtorTransaction", fields: [debtorID], references: [id])
-  creditor      User     @relation("CreditorTransaction", fields: [creditorID], references: [id])
-  debtorID      String // owes money     (from)
-  creditorID    String // is owed money  (to)
+model TabAction {
+  tabActionID String   @id @default(cuid())
+  amount      Float
+  date        DateTime @default(now())
+  debtor      User     @relation("DebtorTabAction", fields: [debtorID], references: [id])
+  creditor    User     @relation("CreditorTabAction", fields: [creditorID], references: [id])
+  debtorID    String // owes money     (from)
+  creditorID  String // is owed money  (to)
 
   @@index([debtorID])
   @@index([creditorID])
+  @@map("TabAction")
 }
 
 // Necessary for Next auth

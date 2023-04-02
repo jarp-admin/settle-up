@@ -50,13 +50,21 @@ let ioweu: Command = {
       throw new Error("Debtor and Creditor are the same");
     }
 
-    let overall_tab = await client.tab.addToOrCreate.mutate({
+    let updatedTab = await client.tab.addToOrCreate.mutate({
       amount: parseFloat(payment),
       debtorID: deptorId,
       creditorID: creditorId,
     });
+    if (updatedTab == undefined) {
+      throw new Error("no cannot update tab");
+    }
+
+    let overall_tab = await client.tab.getTab.query({
+      user1ID: deptorId,
+      user2ID: creditorId,
+    });
     if (overall_tab == undefined) {
-      throw new Error("no iowethem available");
+      throw new Error("no iowe available");
     }
 
     let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;

@@ -19,6 +19,20 @@ export const paymentRouter = createTRPCRouter({
       });
 
       const paymentAmount = tab?.amount;
+      if (paymentAmount == undefined) {
+        return;
+      }
+
+      const user = await ctx.prisma.user.findFirst({
+        where: {
+          id: input.creditorID,
+        },
+      });
+
+      const paypalEmail = user?.paypalEmail;
+      if (!paypalEmail) {
+        return;
+      }
 
       const settledTab = await ctx.prisma.tab.updateMany({
         where: {
@@ -30,6 +44,6 @@ export const paymentRouter = createTRPCRouter({
         },
       });
 
-      //   return generatePaypalLink(paymentAmount, "GBP");
+      return generatePaypalLink(paymentAmount, "GBP", paypalEmail);
     }),
 });
