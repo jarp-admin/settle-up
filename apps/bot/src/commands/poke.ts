@@ -6,7 +6,7 @@ let poke: Command = {
     .setName("poke")
     .setDescription("Reminds someone to pay their tab")
     .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping")
+      option.setName("user").setDescription("user to ping").setRequired(true)
     ),
 
   handler: async (i) => {
