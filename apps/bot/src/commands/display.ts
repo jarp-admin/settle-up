@@ -1,11 +1,8 @@
-import {
-  CacheType,
-  ChatInputCommandInteraction,
-  SlashCommandBuilder,
-  User,
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+
 import { Command } from "../types";
-import { client } from "../trpc";
+
+import trpc from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let display: Command = {
@@ -22,12 +19,9 @@ let display: Command = {
       return;
     }
 
-    const { debtorId, creditorId } = await getDebtorCreditorIds(
-      i,
-      target
-    );
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
-    let iowethem = await client.tab.getTab.query({
+    let iowethem = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
