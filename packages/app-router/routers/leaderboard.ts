@@ -21,6 +21,24 @@ export const leaderboardRouter = createTRPCRouter({
     return new Map([...userDebtMap.entries()].sort((a, b) => a[1] - b[1]));
   }),
 
+  getMostCredited: publicProcedure.query(async ({ ctx }) => {
+    const allUsers = await ctx.prisma.user.findMany({
+      include: { credits: true },
+    });
+
+    const userCreditMap = allUsers.reduce((acc, user) => {
+      let totalCredit = user.credits.reduce((prevCredit, tab) => {
+        return prevCredit + tab.amount;
+      }, 0);
+      let name = user.name!;
+
+      acc.set(name, totalCredit);
+      return acc;
+    }, new Map<string, number>());
+
+    return new Map([...userCreditMap.entries()].sort((a, b) => a[1] - b[1]));
+  }),
+
   getDebtHistory: publicProcedure.query(async ({ ctx }) => {
     const allUsers = await ctx.prisma.user.findMany();
 
