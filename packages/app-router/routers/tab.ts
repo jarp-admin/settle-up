@@ -72,9 +72,6 @@ export const tabRouter = createTRPCRouter({
       });
 
       let inverseAmount = inverseTab?.amount;
-      if (inverseAmount == undefined) {
-        inverseAmount = 0;
-      }
 
       const tab = await ctx.prisma.tab.findFirst({
         where: {
@@ -84,12 +81,10 @@ export const tabRouter = createTRPCRouter({
       });
 
       let tabAmount = tab?.amount;
-      if (tabAmount == undefined) {
-        tabAmount = 0;
-      }
 
       if (!tab) {
         if (!inverseTab) {
+          console.log("hello1");
           const createdTab = await ctx.prisma.tab.create({
             data: {
               amount: input.amount,
@@ -99,12 +94,13 @@ export const tabRouter = createTRPCRouter({
           });
           return createdTab.amount;
         } else {
-          if (input.amount > inverseAmount) {
-            tabAmount = input.amount - inverseAmount;
+          console.log("hello2");
+          if (input.amount > inverseAmount!) {
+            tabAmount = input.amount - inverseAmount!;
             inverseAmount = 0;
-          } else if (input.amount < inverseAmount) {
+          } else if (input.amount < inverseAmount!) {
             tabAmount = 0;
-            inverseAmount = inverseAmount - input.amount;
+            inverseAmount = inverseAmount! - input.amount;
           } else {
             tabAmount = 0;
             inverseAmount = 0;
@@ -131,7 +127,7 @@ export const tabRouter = createTRPCRouter({
         }
       } else {
         if (!inverseAmount) {
-          console.log("hello");
+          console.log("hello3");
           const createdTab = await ctx.prisma.tab.updateMany({
             where: {
               debtorID: input.debtorID,
@@ -152,6 +148,7 @@ export const tabRouter = createTRPCRouter({
           });
           return updatedTab?.amount;
         } else {
+          console.log("hello4");
           if (tab.amount + input.amount > inverseAmount) {
             tabAmount = tab.amount + input.amount - inverseAmount;
             inverseAmount = 0;
