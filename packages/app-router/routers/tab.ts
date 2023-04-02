@@ -72,9 +72,6 @@ export const tabRouter = createTRPCRouter({
       });
 
       let inverseAmount = inverseTab?.amount;
-      if (inverseAmount == undefined) {
-        inverseAmount = 0;
-      }
 
       const tab = await ctx.prisma.tab.findFirst({
         where: {
@@ -84,9 +81,6 @@ export const tabRouter = createTRPCRouter({
       });
 
       let tabAmount = tab?.amount;
-      if (tabAmount == undefined) {
-        tabAmount = 0;
-      }
 
       if (!tab) {
         if (!inverseTab) {
@@ -99,12 +93,12 @@ export const tabRouter = createTRPCRouter({
           });
           return createdTab.amount;
         } else {
-          if (input.amount > inverseAmount) {
-            tabAmount = input.amount - inverseAmount;
+          if (input.amount > inverseAmount!) {
+            tabAmount = input.amount - inverseAmount!;
             inverseAmount = 0;
-          } else if (input.amount < inverseAmount) {
+          } else if (input.amount < inverseAmount!) {
             tabAmount = 0;
-            inverseAmount = inverseAmount - input.amount;
+            inverseAmount = inverseAmount! - input.amount;
           } else {
             tabAmount = 0;
             inverseAmount = 0;
