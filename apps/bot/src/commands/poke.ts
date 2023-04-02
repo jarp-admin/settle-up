@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from "discord.js";
+
 import { Command } from "../types";
-import { client } from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
+import trpc from "../trpc";
 
 let poke: Command = {
   command: new SlashCommandBuilder()
@@ -15,12 +16,9 @@ let poke: Command = {
     let target = i.options.getUser("user");
     let sender = i.user;
 
-    const { debtorId, creditorId } = await getDebtorCreditorIds(
-      i,
-      target
-    );
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
-    let overall_tab = await client.tab.getTab.query({
+    let overall_tab = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
