@@ -93,9 +93,13 @@ let uoweme: Command = {
         throw new Error("no cannot update tab");
       }
 
-      let overall_tab = updatedTab; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
-
-      //! call ash
+      let overall_tab = await client.tab.getTab.query({
+        user1ID: deptorId,
+        user2ID: creditorId,
+      });
+      if (overall_tab == undefined) {
+        throw new Error("cannot get overall tab");
+      }
 
       let x = `Added £${payment_amount} to ${payer.username}'s tab with ${recipient.username}. `;
       let Response = "";
