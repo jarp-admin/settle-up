@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { generatePaypalLink } from "../utils/payments";
 
-export const tabRouter = createTRPCRouter({
+export const paymentRouter = createTRPCRouter({
   getLink: publicProcedure
     .input(
       z.object({
@@ -19,6 +19,17 @@ export const tabRouter = createTRPCRouter({
       });
 
       const paymentAmount = tab?.amount;
+      if (paymentAmount == undefined) {
+        return;
+      }
+
+      const user = await ctx.prisma.user.findFirst({
+        where: {
+          id: input.creditorID,
+        },
+      });
+
+      paypalEmail = user.paypalEmail;
 
       const settledTab = await ctx.prisma.tab.updateMany({
         where: {
@@ -30,6 +41,6 @@ export const tabRouter = createTRPCRouter({
         },
       });
 
-      //   return generatePaypalLink(paymentAmount, "GBP");
+      return generatePaypalLink(paymentAmount, "GBP", paypalEmail);
     }),
 });

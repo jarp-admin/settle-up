@@ -1,5 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message, SlashCommandBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Message,
+  SlashCommandBuilder,
+} from "discord.js";
 import { Command } from "../types";
+import { client } from "../trpc";
 
 let ioweu: Command = {
   command: new SlashCommandBuilder()
@@ -8,26 +15,57 @@ let ioweu: Command = {
     .addUserOption((option) =>
       option.setName("user").setDescription("user to owe").setRequired(true)
     )
-    .addIntegerOption((option) =>
-      option.setName("payment").setDescription("amount to owe").setRequired(true)
+    .addStringOption((option) =>
+      option
+        .setName("payment")
+        .setDescription("amount to owe")
+        .setRequired(true)
     ),
-    
 
   handler: async (i) => {
+    let payment = i.options.getString("payment");
+    if (payment == null) {
+      return;
+    }
     let target = i.options.getUser("user");
-    let amount = -10; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
-    let payment = i.options.getInteger("payment");
-    let x = `Added ${payment} to ${i.user}'s tab with ${target} /n`
+    if (target == null) {
+      return;
+    }
+
+    const deptorId = await client.user.getUserId.query({
+      discordId: i.user.id,
+    });
+    if (deptorId == undefined) {
+      throw new Error("No deptor selected");
+    }
+
+    const creditorId = await client.user.getUserId.query({
+      discordId: target?.id,
+    });
+    if (creditorId == undefined) {
+      throw new Error("No creditor selected");
+    }
+
+    let overall_tab = await client.tab.addToOrCreate.mutate({
+      amount: parseFloat(payment),
+      debtorID: deptorId,
+      creditorID: creditorId,
+    });
+    if (overall_tab == undefined) {
+      throw new Error("no iowethem available");
+    }
+
+    let x = `Added ${payment} to ${i.user}'s tab with ${target}. `;
+
     let Response = "";
-    if (amount > 0){
-      Response = x + `You owe ${target} ${amount}`;
-    }
-    else if (amount < 0){
-      amount = amount * -1
-      Response =  x + `${target} owes you ${amount}`
-    }
-    else{
-      Response =  x + `You and ${target} are squared up`
+
+    if (overall_tab > 0) {
+      Response = x + `You owe ${target} ${overall_tab}`;
+    } else if (overall_tab < 0) {
+      overall_tab = overall_tab * -1;
+      Response = x + `${target} owes you ${overall_tab}`;
+    } else {
+      Response = x + `You and ${target} are squared up`;
     }
     await i.reply({ content: Response });
   },
