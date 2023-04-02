@@ -3,13 +3,14 @@ import display from "./commands/display";
 import ping from "./commands/ping";
 import settleup from "./commands/settleup";
 import ioweu from "./commands/ioweu";
-import uoweme from "./commands/uoweme"
+import uoweme from "./commands/uoweme";
+import poke from "./commands/poke";
 import { Command } from "./types";
 
 export let commands = new Collection<string, Command>();
 
 // * register your commands here
-addCommands([ping, display, settleup, ioweu, uoweme]);
+addCommands([ping, display, settleup, ioweu, uoweme, poke]);
 
 export async function handleCommand(i: ChatInputCommandInteraction<CacheType>) {
   const command = commands.get(i.commandName);
