@@ -7,6 +7,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { Command } from "../types";
+const { EmbedBuilder } = require('discord.js');
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -25,15 +26,20 @@ let settleup: Command = {
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId("User 2")
-        .setLabel(i.user.tag || "")
-        .setStyle(ButtonStyle.Primary) /*,
-      new ButtonBuilder()
-        .setCustomId("link")
-        .setLabel("Payment Link")
-        .setStyle(ButtonStyle.Link)//*/
+        .setLabel(i.user.username || "")
+        .setStyle(ButtonStyle.Primary)
     );
+    const exampleEmbed = new EmbedBuilder()
+      .setColor(0x0099FF)
+      .setTitle('Purchase link')
+      .setURL('https://discord.js.org/') //set link here
     // if get iowethem > 0:
     const Response = `You are going to pay ${target} `; /*amount of money`*/
+
+    
+
+    let response_it = [0, 0]
+
     // if iowethem = 0 and theyoweme > 0:
     //  const Response =  `${target} owes you `/*amount of money, get them to pay you instead`*/
     // else:
@@ -45,8 +51,12 @@ let settleup: Command = {
       components: [button] /**/,
     });
 
+    // (embeds: exampleEmbed)
+    
     msg.createMessageComponentCollector().on("collect", async (i) => {
-      i.reply("yes");
+      await i.reply(i.id);
+
+      let x = 0;
     });
   },
 };

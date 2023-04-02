@@ -46,6 +46,10 @@ let ioweu: Command = {
       throw new Error("No creditor selected");
     }
 
+    if(deptorId == creditorId){
+      throw new Error("Debtor and Creditor are the same");
+    }
+
     let overall_tab = await client.tab.addToOrCreate.mutate({
       amount: parseFloat(payment),
       debtorID: deptorId,
