@@ -17,4 +17,21 @@ export const userRouter = createTRPCRouter({
 
       return account?.userId;
     }),
+  updatePaypalEmail: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        paypalEmail: z.string().email(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = await ctx.prisma.user.update({
+        where: {
+          id: input.userId,
+        },
+        data: {
+          paypalEmail: input.paypalEmail,
+        },
+      });
+    }),
 });
