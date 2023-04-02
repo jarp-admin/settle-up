@@ -5,7 +5,7 @@ let Layout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <>
       <Header />
-      <main className="text-black">{children}</main>
+      <main className="text-black font-mono pt-20">{children}</main>
     </>
   );
 };

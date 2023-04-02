@@ -1,19 +1,27 @@
 import { NextPage } from "next";
 import { useSession } from "next-auth/react";
+import useMostDebted from "~/hooks/useMostDebted";
 
 const Leaderboard: NextPage = () => {
   let { data: session } = useSession();
-  let user = session?.user;
-let leaderboardData = new Map<string, number>()
-let testData = [["user1", 10], ["user4", 30], ["user3", 12], ["user2", 44]]  
+let leaderboardData = useMostDebted();
+
+if (!leaderboardData) return <></>
 return (
-    <>
-      {testData.map((userID, userDebt)=>{
-        <div className="grid grid-cols-2">
-            <h3 className="col-span-2">userID</h3>
-        <h3 className="col-span-2">{userDebt}</h3></div>
-      })}
-    </>
+  <div className="-mt-20 flex w-full h-screen justify-center items-center font-mono overflow-clip">
+      {leaderboardData && 
+      <div className="grid grid-cols-4 bg-slate-800 rounded-xl shadow-md min-w-60 max-w-max md:w-96">
+        <h2 className="col-span-2 text-primary font-semibold text-center bg-slate-700 rounded-tl-xl p-4 text-xl">User</h2>
+        <h2 className="col-span-2 text-primary font-semibold text-center bg-slate-700 rounded-tr-xl p-4 text-xl">Current Debt</h2>
+        {leaderboardData && leaderboardData.map((row, i)=>
+          <>
+            <h3 key={`user${i}`} className="col-span-2 py-3 text-slate-300 text-center">{row[0]}</h3>
+            <h3 key={`debt${i}`} className="col-span-2 py-3 text-slate-300 text-center">{row[1]}</h3>
+          </>
+        )}
+        </div>
+      }
+    </div>
   );
 };
 

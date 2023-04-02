@@ -20,8 +20,8 @@ const profile: NextPage = () => {
 
     const id = session?.user.id!
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950">
-        <div className="flex flex-row gap-10 items-end">
+      <div className="-mt-20 flex h-screen items-center justify-center bg-slate-950">
+        <div className="flex flex-row flex-wrap gap-10 items-end px-8 justify-center">
         <div className="form-control">
             <label className="label">
                 <span className="label-text">Your Email</span>
