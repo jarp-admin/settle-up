@@ -41,19 +41,19 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const iou = await ctx.prisma.tab.findMany({
+      const i_owe_u = await ctx.prisma.tab.findMany({
         where: {
           debtorID: input.userID,
         },
       });
 
-      const uome = await ctx.prisma.tab.findMany({
+      const u_owe_me = await ctx.prisma.tab.findMany({
         where: {
           creditorID: input.userID,
         },
       });
 
-      return { iOwe: iou, oweMe: uome };
+      return { i_owe_u, u_owe_me };
     }),
   addToOrCreate: publicProcedure
     .input(
