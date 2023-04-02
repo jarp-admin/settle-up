@@ -1,3 +1,4 @@
+import { getDateDiff } from "./../utils/dateDiff";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
@@ -20,6 +21,35 @@ export const leaderboardRouter = createTRPCRouter({
     return new Map([...userDebtMap.entries()].sort((a, b) => a[1] - b[1]));
   }),
 
+  getDebtHistory: publicProcedure.query(async ({ ctx }) => {
+    const allUsers = await ctx.prisma.user.findMany();
+
+    const allTabActions = await ctx.prisma.tabAction.findMany();
+
+    const firstDate = allTabActions.at(0)?.date!;
+    const lastDate = allTabActions.at(allTabActions.length - 1)?.date!;
+
+    const diffDays = getDateDiff(lastDate, firstDate);
+
+    const emptyDebtHistory: number[] = Array(diffDays).fill(0);
+
+    let userDebtHistoryMap = allUsers.reduce((acc, user) => {
+      acc.set(user.id!, [...emptyDebtHistory]);
+      return acc;
+    }, new Map<string, number[]>());
+
+    allTabActions.forEach((tab) => {
+      let i = getDateDiff(tab.date, firstDate);
+      let debt = userDebtHistoryMap.get(tab.debtorID)!;
+      let credit = userDebtHistoryMap.get(tab.creditorID)!;
+      debt[i] += tab.amount;
+      credit[i] -= tab.amount;
+      userDebtHistoryMap.set(tab.debtorID, debt);
+      userDebtHistoryMap.set(tab.creditorID, credit);
+    });
+
+    return userDebtHistoryMap;
+  }),
   //   getTab: publicProcedure
   //     .input(
   //       z.object({
