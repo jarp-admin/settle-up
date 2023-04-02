@@ -3,7 +3,7 @@ import { client } from "../trpc";
 export const getDebtorCreditorIds = async (
   i: any,
   target: any
-) => {
+): Promise<{ debtorId: string; creditorId: string }> => {
   const debtorId = await client.user.getUserId.query({
     discordId: i.user.id,
   });

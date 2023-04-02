@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { Command } from "../types";
 const { EmbedBuilder } = require("discord.js");
-import { client as trpc} from "../trpc";
+import { client as trpc } from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let settleup: Command = {
@@ -31,10 +31,7 @@ let settleup: Command = {
       return;
     }
 
-    const { debtorId, creditorId } = await getDebtorCreditorIds(
-      i,
-      target
-    );
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
     if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
@@ -106,6 +103,11 @@ let settleup: Command = {
       }
 
       await i.deferUpdate();
+
+      const clearedTab = await trpc.tab.clear.mutate({
+        debtorID: debtorId,
+        creditorID: creditorId,
+      });
 
       await i.editReply({ content: res_msg, components: [] });
       await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
