@@ -1,5 +1,4 @@
-import { getDateDiff } from "./../utils/dateDiff";
-import { z } from "zod";
+import { getDateDiff } from "../utils";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const leaderboardRouter = createTRPCRouter({

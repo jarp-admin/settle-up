@@ -5,7 +5,7 @@ interface props {
   data: number[];
 }
 
-let Graph: FC<props> = ({ data }) => {
+const Graph: FC<props> = ({ data }) => {
   let scale = propScale([...data, 0]);
   let tickSize = data.length;
 

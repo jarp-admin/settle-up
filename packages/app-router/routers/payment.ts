@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePaypalLink } from "../utils/payments";
+import { generatePaypalLink } from "../utils";
 
 export const paymentRouter = createTRPCRouter({
   getLink: publicProcedure

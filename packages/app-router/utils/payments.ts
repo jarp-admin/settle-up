@@ -1,4 +1,4 @@
-export const generatePaypalLink = (
+const generatePaypalLink = (
   amount: number,
   currency: string,
   email: string
@@ -7,3 +7,5 @@ export const generatePaypalLink = (
   const link = `${baseUrl}${email}&amount=${amount}&currency_code=${currency}&item_name=Payment&no_shipping=1&no_note=1`;
   return link;
 };
+
+export default generatePaypalLink;

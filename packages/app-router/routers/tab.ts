@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePaypalLink } from "../utils/payments";
 
 export const tabRouter = createTRPCRouter({
   getTab: publicProcedure
