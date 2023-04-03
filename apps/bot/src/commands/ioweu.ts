@@ -1,12 +1,8 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  Message,
-  SlashCommandBuilder,
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+
 import { Command } from "../types";
-import { client } from "../trpc";
+
+import trpc from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
 let ioweu: Command = {
@@ -33,12 +29,9 @@ let ioweu: Command = {
       return;
     }
 
-    const { debtorId, creditorId } = await getDebtorCreditorIds(
-      i,
-      target
-    );
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
-    let updatedTab = await client.tab.addToOrCreate.mutate({
+    let updatedTab = await trpc.tab.addToOrCreate.mutate({
       amount: parseFloat(payment),
       debtorID: debtorId,
       creditorID: creditorId,
@@ -47,7 +40,7 @@ let ioweu: Command = {
       throw new Error("no cannot update tab");
     }
 
-    let overall_tab = await client.tab.getTab.query({
+    let overall_tab = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });

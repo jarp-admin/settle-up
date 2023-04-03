@@ -4,9 +4,9 @@ import {
   ButtonStyle,
   SlashCommandBuilder,
 } from "discord.js";
+
+import trpc from "../trpc";
 import { Command } from "../types";
-import { client } from "../trpc";
-import { registerCustom } from "superjson";
 
 let uoweme: Command = {
   command: new SlashCommandBuilder()
@@ -45,14 +45,14 @@ let uoweme: Command = {
       return;
     }
 
-    const deptorId = await client.user.getUserId.query({
+    const deptorId = await trpc.user.getUserId.query({
       discordId: payer.id,
     });
     if (deptorId == undefined) {
       throw new Error("No debtor selected");
     }
 
-    const creditorId = await client.user.getUserId.query({
+    const creditorId = await trpc.user.getUserId.query({
       discordId: recipient.id,
     });
     if (creditorId == undefined) {
@@ -84,7 +84,7 @@ let uoweme: Command = {
 
       await i.user.send("This is a DM!");
 
-      let updatedTab = await client.tab.addToOrCreate.mutate({
+      let updatedTab = await trpc.tab.addToOrCreate.mutate({
         amount: parseFloat(String(payment_amount)),
         debtorID: deptorId,
         creditorID: creditorId,
@@ -93,9 +93,13 @@ let uoweme: Command = {
         throw new Error("no cannot update tab");
       }
 
-      let overall_tab = updatedTab; //this will be the overall amount owed between the users, positive if sender owes reciever, negative otherwise
-
-      //! call ash
+      let overall_tab = await client.tab.getTab.query({
+        user1ID: deptorId,
+        user2ID: creditorId,
+      });
+      if (overall_tab == undefined) {
+        throw new Error("cannot get overall tab");
+      }
 
       let x = `Added £${payment_amount} to ${payer.username}'s tab with ${recipient.username}. `;
       let Response = "";

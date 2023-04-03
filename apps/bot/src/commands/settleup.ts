@@ -2,14 +2,13 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Events,
-  Message,
+  EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
+
 import { Command } from "../types";
-const { EmbedBuilder } = require("discord.js");
-import { client as trpc } from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
+import trpc from "../trpc";
 
 let settleup: Command = {
   command: new SlashCommandBuilder()
@@ -74,7 +73,6 @@ let settleup: Command = {
       .setColor(0x0099ff)
       .setTitle("Purchase link")
       .setURL(payment_link);
-
 
     const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
