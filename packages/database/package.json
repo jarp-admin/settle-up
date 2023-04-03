@@ -1,16 +1,15 @@
 {
   "name": "database",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "build": "prisma generate",
+    "db:push": "prisma db push --skip-generate"
+  },
   "dependencies": {
     "@prisma/client": "latest"
   },
   "devDependencies": {
     "prisma": "4.12.0"
-  },
-  "scripts": {
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push --skip-generate",
-    "build": "prisma generate"
-  },
-  "main": "./index.ts",
-  "types": "./index.ts"
+  }
 }
