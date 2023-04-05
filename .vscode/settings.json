@@ -3,5 +3,6 @@
     "testclient": "test",
     "bot": "api",
     "app-router": "controller"
-  }
+  },
+  "cSpell.words": ["daisyui", "superjson", "tailwindcss", "trpc", "turborepo"]
 }

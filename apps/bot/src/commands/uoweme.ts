@@ -93,7 +93,7 @@ let uoweme: Command = {
         throw new Error("no cannot update tab");
       }
 
-      let overall_tab = await client.tab.getTab.query({
+      let overall_tab = await trpc.tab.getTab.query({
         user1ID: deptorId,
         user2ID: creditorId,
       });

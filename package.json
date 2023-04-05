@@ -8,16 +8,19 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "check": "env",
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "eslint-config-custom": "*",
     "prettier": "^2.8.7",
+    "prettier-plugin-packagejson": "^2.4.3",
+    "prettier-plugin-prisma": "^4.12.0",
+    "prettier-plugin-tailwindcss": "^0.2.6",
     "turbo": "latest"
   },
+  "packageManager": "npm@8.19.2",
   "engines": {
     "node": ">=14.0.0"
-  },
-  "packageManager": "npm@8.19.2"
+  }
 }

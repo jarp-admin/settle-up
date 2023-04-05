@@ -1,0 +1,17 @@
+{
+  "name": "env",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./src/index.ts",
+  "bin": "./dist/bin.js",
+  "scripts": {
+    "build": "tsup ./src/index.ts ./src/bin.ts --format cjs,esm --sourcemap"
+  },
+  "dependencies": {
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.3"
+  }
+}

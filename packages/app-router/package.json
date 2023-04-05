@@ -1,14 +1,8 @@
 {
   "name": "app-router",
   "version": "1.0.0",
-  "description": "",
   "main": "index.ts",
   "types": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@trpc/server": "^10.18.0",
     "superjson": "^1.12.2",

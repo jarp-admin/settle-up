@@ -4,20 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node src/server.ts",
-    "build": ""
+    "dev": "nodemon -r tsconfig-paths/register ./src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",
     "cors": "^2.8.5",
-    "database": "*",
     "superjson": "^1.12.2",
-    "trpc": "*",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
+    "nodemon": "^2.0.22",
     "ts-node": "^10.9.1"
+  },
+  "peerDependencies": {
+    "app-router": "*",
+    "database": "*"
   }
 }

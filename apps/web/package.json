@@ -5,17 +5,14 @@
   "scripts": {
     "build": "echo 'broken'",
     "dev": "next dev",
-    "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.5",
     "@prisma/client": "^4.11.0",
-    "daisyui": "^2.51.5",
-    "database": "*",
-    "app-router": "*",
     "cross-fetch": "^3.1.5",
+    "daisyui": "^2.51.5",
     "next": "^13.2.4",
     "next-auth": "^4.20.1",
     "react": "18.2.0",
@@ -41,7 +38,9 @@
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.2"
   },
-  "ct3aMetadata": {
-    "initVersion": "7.10.1"
+  "peerDependencies": {
+    "app-router": "*",
+    "database": "*",
+    "env": "*"
   }
 }
