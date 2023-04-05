@@ -11,6 +11,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.2.1",
     "tsup": "^6.7.0",
     "typescript": "^5.0.3"
   }

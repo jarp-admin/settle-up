@@ -7,12 +7,15 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "check": "env",
-    "dev": "turbo run dev",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "build": "turbo build",
+    "check": "dotenv -- env",
+    "dev": "turbo dev",
+    "format": "write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "dotenv-cli": "^7.2.1",
+    "eslint": "^8.37.0",
+    "eslint-plugin-node": "^11.1.0",
     "prettier": "^2.8.7",
     "prettier-plugin-packagejson": "^2.4.3",
     "prettier-plugin-prisma": "^4.12.0",
