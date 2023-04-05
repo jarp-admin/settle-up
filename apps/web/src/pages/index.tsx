@@ -1,29 +1,41 @@
-import { type NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
-import Graph from "~/components/Graph";
-import useMostDebted from "~/hooks/useMostDebted";
+import type { NextPage } from "next";
+import { useMostDebted } from "~/hooks";
 
 const Home: NextPage = () => {
   let leaderboardData = useMostDebted();
 
-  if (!leaderboardData) return <></>
+  if (!leaderboardData) return <></>;
   return (
-    <div className="-mt-20 flex w-full h-screen justify-center items-center font-mono overflow-clip">
-        {leaderboardData && 
-        <div className="grid grid-cols-4 bg-slate-800 rounded-xl shadow-md min-w-60 max-w-max md:w-96">
-          <h2 className="col-span-2 text-primary font-semibold text-center bg-slate-700 rounded-tl-xl p-4 text-xl">User</h2>
-          <h2 className="col-span-2 text-primary font-semibold text-center bg-slate-700 rounded-tr-xl p-4 text-xl">Current Debt</h2>
-          {leaderboardData && leaderboardData.map((row, i)=>
-            <>
-              <h3 key={`user${i}`} className="col-span-2 py-3 text-slate-300 text-center">{row[0]}</h3>
-              <h3 key={`debt${i}`} className="col-span-2 py-3 text-slate-300 text-center">{row[1]}</h3>
-            </>
-          )}
-          </div>
-        }
-      </div>
-    );
+    <div className="-mt-20 flex h-screen w-full items-center justify-center overflow-clip font-mono">
+      {leaderboardData && (
+        <div className="min-w-60 grid max-w-max grid-cols-4 rounded-xl bg-slate-800 shadow-md md:w-96">
+          <h2 className="col-span-2 rounded-tl-xl bg-slate-700 p-4 text-center text-xl font-semibold text-primary">
+            User
+          </h2>
+          <h2 className="col-span-2 rounded-tr-xl bg-slate-700 p-4 text-center text-xl font-semibold text-primary">
+            Current Debt
+          </h2>
+          {leaderboardData &&
+            leaderboardData.map((row, i) => (
+              <>
+                <h3
+                  key={`user${i}`}
+                  className="col-span-2 py-3 text-center text-slate-300"
+                >
+                  {row[0]}
+                </h3>
+                <h3
+                  key={`debt${i}`}
+                  className="col-span-2 py-3 text-center text-slate-300"
+                >
+                  {row[1]}
+                </h3>
+              </>
+            ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Home;

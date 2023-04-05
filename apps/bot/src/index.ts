@@ -1,12 +1,4 @@
-import * as dotenv from "dotenv";
-import { z } from "zod";
-dotenv.config();
-
-let envSchema = z.object({
-  TOKEN: z.string().nonempty(),
-});
-
-let env = envSchema.parse(process.env);
+import env from "env";
 
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { handleCommand } from "./command_registry";
@@ -26,4 +18,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
   await handleCommand(interaction);
 });
 
-client.login(env.TOKEN);
+client.login(env.DISCORD_CLIENT_TOKEN);

@@ -1,8 +1,7 @@
 {
   "material-icon-theme.folders.associations": {
     "testclient": "test",
-    "bot": "api",
-    "app-router": "api"
+    "bot": "controller"
   },
   "cSpell.words": ["daisyui", "superjson", "tailwindcss", "trpc", "turborepo"]
 }

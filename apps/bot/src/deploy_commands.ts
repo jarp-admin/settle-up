@@ -1,9 +1,6 @@
-import * as dotenv from "dotenv";
-dotenv.config();
-
+import env from "env";
 import { REST, Routes } from "discord.js";
 import { commands } from "./command_registry";
-
 
 (async () => {
   let coms = [];
@@ -12,9 +9,7 @@ import { commands } from "./command_registry";
     coms.push(com.command.toJSON!());
   }
 
-  const rest = new REST({ version: "10" }).setToken(
-    process.env.TOKEN as string
-  );
+  const rest = new REST({ version: "10" }).setToken(env.DISCORD_CLIENT_TOKEN);
 
   try {
     console.log(`Started refreshing ${coms.length} application (/) commands.`);
@@ -22,8 +17,8 @@ import { commands } from "./command_registry";
     // The put method is used to fully refresh all commands in the guild with the current set
     const data = await rest.put(
       Routes.applicationGuildCommands(
-        process.env.CLIENT_ID as string,
-        process.env.GUILD_ID as string
+        env.DISCORD_CLIENT_ID,
+        env.DISCORD_DEV_GUILD_ID
       ),
       { body: coms }
     );
