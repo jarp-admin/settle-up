@@ -26,8 +26,9 @@ function check() {
 
     if (parsed.success === false) {
       console.error(
-        "[❌] Invalid environment variables:",
-        parsed.error.flatten().fieldErrors
+        "Invalid environment variables:",
+        parsed.error.flatten().fieldErrors,
+        "\n"
       );
       throw new Error("Invalid environment variables");
     }
