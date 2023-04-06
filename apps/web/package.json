@@ -39,7 +39,7 @@
     "typescript": "^5.0.2"
   },
   "peerDependencies": {
-    "app-router": "*",
+    "api": "*",
     "database": "*",
     "env": "*"
   }
