@@ -5,7 +5,7 @@
   "scripts": {
     "build": "dotenv -e ../../.env prisma generate",
     "db:push": "dotenv -e ../../.env prisma db push --skip-generate",
-    "dev": "cross-env PGPASSWORD=jarp psql -U postgres"
+    "db:start": "cross-env PGPASSWORD=jarp psql -U postgres"
   },
   "dependencies": {
     "@prisma/client": "latest"
