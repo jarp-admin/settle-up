@@ -4,12 +4,14 @@
   "types": "./index.ts",
   "scripts": {
     "build": "dotenv -e ../../.env prisma generate",
-    "db:push": "dotenv -e ../../.env prisma db push --skip-generate"
+    "db:push": "dotenv -e ../../.env prisma db push --skip-generate",
+    "dev": "cross-env PGPASSWORD=jarp psql -U postgres"
   },
   "dependencies": {
     "@prisma/client": "latest"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "dotenv-cli": "^7.2.1",
     "prisma": "4.12.0"
   }
