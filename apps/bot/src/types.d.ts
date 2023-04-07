@@ -4,7 +4,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 
-declare interface Command {
+export interface Command {
   command: Partial<SlashCommandBuilder>;
   handler: (
     interaction: ChatInputCommandInteraction<CacheType>
