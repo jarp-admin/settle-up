@@ -2,10 +2,10 @@
   "name": "env",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "bin": "./dist/bin.js",
   "scripts": {
-    "build": "tsup ./src/index.ts ./src/bin.ts --format cjs,esm --sourcemap"
+    "build": "tsup ./src/index.ts ./src/bin.ts --format cjs,esm --dts --onSuccess \"tsc --emitDeclarationOnly --declaration\" "
   },
   "dependencies": {
     "zod": "^3.21.4"
