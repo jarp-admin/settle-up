@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -r tsconfig-paths/register ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "dotenv -e ../../.env nodemon -r tsconfig-paths/register ./src/server.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",
@@ -15,6 +14,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
+    "dotenv-cli": "^7.2.1",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1"
   },

@@ -3,13 +3,14 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "build": "prisma generate",
-    "db:push": "prisma db push --skip-generate"
+    "build": "dotenv -e ../../.env prisma generate",
+    "db:push": "dotenv -e ../../.env prisma db push --skip-generate"
   },
   "dependencies": {
     "@prisma/client": "latest"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.2.1",
     "prisma": "4.12.0"
   }
 }
