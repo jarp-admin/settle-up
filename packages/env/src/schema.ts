@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const required = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
+  // this can be generated with:
+  //? $ openssl rand -base64 32
   NEXTAUTH_SECRET:
     process.env.NODE_ENV === "production"
       ? z.string().min(1)
