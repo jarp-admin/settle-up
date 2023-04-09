@@ -4,7 +4,6 @@
   "description": "",
   "license": "ISC",
   "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
-  "main": "build/index.js",
   "scripts": {
     "build": "dotenv -e ../../.env tsc",
     "deploy": "dotenv -e ../../.env ts-node ./src/deploy_commands.ts",
