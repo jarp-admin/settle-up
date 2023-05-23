@@ -4,6 +4,10 @@
  */
 !process.env.SKIP_ENV_VALIDATION && (await import("env"));
 
+import withTmInitializer from "next-transpile-modules";
+
+const withTranspile = withTmInitializer(["api"]);
+
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
@@ -19,4 +23,5 @@ const config = {
     defaultLocale: "en",
   },
 };
-export default config;
+
+export default withTranspile(config);
