@@ -20,7 +20,7 @@
     "prettier-plugin-packagejson": "^2.4.3",
     "prettier-plugin-prisma": "^4.12.0",
     "prettier-plugin-tailwindcss": "^0.2.6",
-    "turbo": "latest"
+    "turbo": "^1.9.8"
   },
   "packageManager": "npm@8.19.2",
   "engines": {
