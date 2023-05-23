@@ -1,20 +1,18 @@
 import type { NextPage } from "next";
-import { useSession } from "next-auth/react";
-import { useMostDebted } from "~/hooks";
+import { api } from "~/trpc";
 
 const Leaderboard: NextPage = () => {
-  let { data: session } = useSession();
-  let leaderboardData = useMostDebted();
+  const { data: leaderboardData } = api.leaderboard.getMostDebt.useQuery();
 
   if (!leaderboardData) return <></>;
   return (
     <div className="-mt-20 flex h-screen w-full items-center justify-center overflow-clip font-mono">
       {leaderboardData && (
         <div className="min-w-60 grid max-w-max grid-cols-4 rounded-xl bg-slate-800 shadow-md md:w-96">
-          <h2 className="col-span-2 rounded-tl-xl bg-slate-700 p-4 text-center text-xl font-semibold text-primary">
+          <h2 className="text-primary col-span-2 rounded-tl-xl bg-slate-700 p-4 text-center text-xl font-semibold">
             User
           </h2>
-          <h2 className="col-span-2 rounded-tr-xl bg-slate-700 p-4 text-center text-xl font-semibold text-primary">
+          <h2 className="text-primary col-span-2 rounded-tr-xl bg-slate-700 p-4 text-center text-xl font-semibold">
             Current Debt
           </h2>
           {leaderboardData &&
