@@ -10,29 +10,40 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const tab = await ctx.prisma.tab.findFirst({
+      const tabs = await ctx.prisma.tab.findMany({
         where: {
-          debtorID: input.user1ID,
-          creditorID: input.user2ID,
+          OR: [
+            {
+              debtorID: input.user1ID,
+              creditorID: input.user2ID,
+            },
+            {
+              debtorID: input.user2ID,
+              creditorID: input.user1ID,
+            },
+          ],
         },
+        take: 2,
       });
 
-      if (tab?.amount != 0) {
-        return tab?.amount;
-      } else {
-        const inverseTab = await ctx.prisma.tab.findFirst({
-          where: {
-            debtorID: input.user2ID,
-            creditorID: input.user1ID,
-          },
-        });
-        if (inverseTab?.amount == 0 || inverseTab?.amount == undefined) {
-          return 0;
-        }
+      const tab = tabs.find(
+        (t) => t.debtorID === input.user1ID && t.creditorID === input.user2ID
+      );
+      const inverseTab = tabs.find(
+        (t) => t.debtorID === input.user2ID && t.creditorID === input.user1ID
+      );
 
-        return -inverseTab?.amount;
+      if (tab && tab.amount != 0) {
+        return tab.amount;
       }
+
+      if (!inverseTab || inverseTab.amount == 0) {
+        return 0;
+      }
+
+      return -inverseTab.amount;
     }),
+
   getAllTabs: publicProcedure
     .input(
       z.object({
@@ -40,20 +51,18 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const i_owe_u = await ctx.prisma.tab.findMany({
+      const all_tabs = await ctx.prisma.tab.findMany({
         where: {
-          debtorID: input.userID,
+          OR: [{ debtorID: input.userID }, { creditorID: input.userID }],
         },
       });
 
-      const u_owe_me = await ctx.prisma.tab.findMany({
-        where: {
-          creditorID: input.userID,
-        },
-      });
+      const i_owe_u = all_tabs.filter((t) => t.debtorID === input.userID);
+      const u_owe_me = all_tabs.filter((t) => t.creditorID === input.userID);
 
       return { i_owe_u, u_owe_me };
     }),
+
   addToOrCreate: publicProcedure
     .input(
       z.object({
@@ -63,26 +72,35 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      let inverseTab = await ctx.prisma.tab.findFirst({
+      let tabs = await ctx.prisma.tab.findMany({
         where: {
-          debtorID: input.creditorID,
-          creditorID: input.debtorID,
+          OR: [
+            {
+              debtorID: input.debtorID,
+              creditorID: input.creditorID,
+            },
+            {
+              debtorID: input.creditorID,
+              creditorID: input.debtorID,
+            },
+          ],
         },
+        take: 2,
       });
 
-      let inverseAmount = inverseTab?.amount;
+      const tabAmount = tabs.find(
+        (t) =>
+          t.debtorID === input.debtorID && t.creditorID === input.creditorID
+      )?.amount;
+      const inverseTabAmount = tabs.find(
+        (t) =>
+          t.debtorID === input.creditorID && t.creditorID === input.debtorID
+      )?.amount;
 
-      const tab = await ctx.prisma.tab.findFirst({
-        where: {
-          debtorID: input.debtorID,
-          creditorID: input.creditorID,
-        },
-      });
+      let newTabAmount: number, newInverseTabAmount: number;
 
-      let tabAmount = tab?.amount;
-
-      if (!tab) {
-        if (!inverseTab) {
+      if (!tabAmount || tabAmount == 0) {
+        if (!inverseTabAmount || inverseTabAmount == 0) {
           const createdTab = await ctx.prisma.tab.create({
             data: {
               amount: input.amount,
@@ -92,20 +110,20 @@ export const tabRouter = createTRPCRouter({
           });
           return createdTab.amount;
         } else {
-          if (input.amount > inverseAmount!) {
-            tabAmount = input.amount - inverseAmount!;
-            inverseAmount = 0;
-          } else if (input.amount < inverseAmount!) {
-            tabAmount = 0;
-            inverseAmount = inverseAmount! - input.amount;
+          if (input.amount > inverseTabAmount) {
+            newTabAmount = input.amount - inverseTabAmount;
+            newInverseTabAmount = 0;
+          } else if (input.amount < inverseTabAmount) {
+            newTabAmount = 0;
+            newInverseTabAmount = inverseTabAmount - input.amount;
           } else {
-            tabAmount = 0;
-            inverseAmount = 0;
+            newTabAmount = 0;
+            newInverseTabAmount = 0;
           }
 
           const createdTab = await ctx.prisma.tab.create({
             data: {
-              amount: tabAmount,
+              amount: newTabAmount,
               debtorID: input.debtorID,
               creditorID: input.creditorID,
             },
@@ -117,14 +135,14 @@ export const tabRouter = createTRPCRouter({
               creditorID: input.debtorID,
             },
             data: {
-              amount: inverseAmount,
+              amount: newInverseTabAmount,
             },
           });
           return createdTab.amount;
         }
       } else {
-        if (!inverseAmount) {
-          const createdTab = await ctx.prisma.tab.updateMany({
+        if (!inverseTabAmount) {
+          const updatedTab = await ctx.prisma.tab.updateMany({
             where: {
               debtorID: input.debtorID,
               creditorID: input.creditorID,
@@ -136,23 +154,18 @@ export const tabRouter = createTRPCRouter({
             },
           });
 
-          const updatedTab = await ctx.prisma.tab.findFirst({
-            where: {
-              debtorID: input.debtorID,
-              creditorID: input.creditorID,
-            },
-          });
-          return updatedTab?.amount;
+          // TODO: change debtorID and creditorID to unique objects
+          return 0;
         } else {
-          if (tab.amount + input.amount > inverseAmount) {
-            tabAmount = tab.amount + input.amount - inverseAmount;
-            inverseAmount = 0;
-          } else if (tab.amount + input.amount < inverseAmount) {
-            tabAmount = 0;
-            inverseAmount = inverseAmount - (tab.amount + input.amount);
+          if (tabAmount + input.amount > inverseTabAmount) {
+            newTabAmount = tabAmount + input.amount - inverseTabAmount;
+            newInverseTabAmount = 0;
+          } else if (tabAmount + input.amount < inverseTabAmount) {
+            newTabAmount = 0;
+            newInverseTabAmount = inverseTabAmount - (tabAmount + input.amount);
           } else {
-            tabAmount = 0;
-            inverseAmount = 0;
+            newTabAmount = 0;
+            newInverseTabAmount = 0;
           }
 
           const updatedTab = await ctx.prisma.tab.updateMany({
@@ -161,7 +174,7 @@ export const tabRouter = createTRPCRouter({
               creditorID: input.creditorID,
             },
             data: {
-              amount: tabAmount,
+              amount: newTabAmount,
             },
           });
 
@@ -171,21 +184,16 @@ export const tabRouter = createTRPCRouter({
               creditorID: input.debtorID,
             },
             data: {
-              amount: inverseAmount,
+              amount: newInverseTabAmount,
             },
           });
 
-          const updatedTabFind = await ctx.prisma.tab.findFirst({
-            where: {
-              debtorID: input.debtorID,
-              creditorID: input.creditorID,
-            },
-          });
-
-          return updatedTabFind?.amount;
+          // TODO: change debtorID and creditorID to unique objects
+          return 0;
         }
       }
     }),
+
   clear: publicProcedure
     .input(
       z.object({

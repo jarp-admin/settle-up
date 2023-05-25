@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
-  getUserId: publicProcedure
+  getUserIdFromDiscordId: publicProcedure
     .input(
       z.object({
         discordId: z.string(),
@@ -17,6 +17,7 @@ export const userRouter = createTRPCRouter({
 
       return account?.userId;
     }),
+
   updatePaypalEmail: publicProcedure
     .input(
       z.object({
@@ -33,5 +34,7 @@ export const userRouter = createTRPCRouter({
           paypalEmail: input.paypalEmail,
         },
       });
+
+      return user;
     }),
 });
