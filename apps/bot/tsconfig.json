@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "target": "ES2021",
     "tsBuildInfoFile": "./dist/buildInfo.json",
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true
   }
 }
