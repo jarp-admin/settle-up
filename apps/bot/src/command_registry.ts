@@ -11,7 +11,15 @@ import { Command } from "./types";
 export let commands = new Collection<string, Command>();
 
 // * register your commands here
-addCommands([ping, display, settleup, ioweu, uoweme, poke, leaderboard]);
+addCommands([
+  new ping(),
+  new display(),
+  settleup,
+  ioweu,
+  uoweme,
+  poke,
+  leaderboard,
+]);
 
 export async function handleCommand(i: ChatInputCommandInteraction<CacheType>) {
   const command = commands.get(i.commandName);
