@@ -1,47 +1,41 @@
-import { SlashCommandBuilder } from "discord.js";
-
-import { Command } from "../types";
-
+import { ApplicationCommandOptionType as optTypes } from "discord.js";
+import makeCommand from "../lib/makeCommand";
 import trpc from "../trpc";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 
-let display: Command = {
-  command: new SlashCommandBuilder()
-    .setName("display")
-    .setDescription("Shows how much you owe someone")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping").setRequired(true)
-    ),
+export default makeCommand(
+  {
+    name: "display",
+    description: "Shows how much you owe someone",
+    options: {
+      user: {
+        type: optTypes.User,
+        description: "User you want your debt with",
+        required: true,
+      },
+    },
+  },
+  async (i, { user }) => {
+    const { debtorId, creditorId } = await getDebtorCreditorIds(i, user);
 
-  handler: async (i) => {
-    let target = i.options.getUser("user");
-    if (target == null) {
-      return;
-    }
-
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
-
-    let iowethem = await trpc.tab.getTab.query({
+    let debt = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
-    if (iowethem == undefined) {
+    if (debt == undefined) {
       throw new Error("no iowethem available");
     }
 
     let Response = "";
 
-    if (iowethem > 0) {
-      Response = `You owe ${target.username} £${iowethem}`;
-    } else if (iowethem < 0) {
-      iowethem = iowethem * -1;
-      Response = `${target.username} owes you £${iowethem}`;
+    if (debt > 0) {
+      Response = `You owe ${user.username} £${debt}`;
+    } else if (debt < 0) {
+      Response = `${user.username} owes you £${debt * -1}`;
     } else {
-      Response = `You and ${target.username} are squared up`;
+      Response = `You and ${user.username} are squared up`;
     }
 
     await i.reply({ content: Response });
-  },
-};
-
-export default display;
+  }
+);

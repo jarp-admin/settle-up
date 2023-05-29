@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType as optTypes } from "discord.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,30 +7,30 @@ import {
 } from "discord.js";
 
 import trpc from "../trpc";
-import { Command } from "../types";
+import makeCommand from "../lib/makeCommand";
 
-let uoweme: Command = {
-  command: new SlashCommandBuilder()
-    .setName("uoweme")
-    .setDescription("Add to a persons outstanding tab with you")
-    .addUserOption((option) =>
-      option
-        .setName("user")
-        .setDescription("user who owes you owe")
-        .setRequired(true)
-    )
-    .addIntegerOption((option) =>
-      option
-        .setName("payment")
-        .setDescription("amount to owe")
-        .setRequired(true)
-    ),
-
-  handler: async (i) => {
+let uoweme = makeCommand(
+  {
+    name: "uoweme",
+    description: "Add to a persons outstanding tab with you",
+    options: {
+      payer: {
+        type: optTypes.User,
+        description: "user who owes you",
+        required: true,
+      },
+      payment: {
+        type: optTypes.String,
+        description: "amount to owe",
+        required: true,
+      },
+    },
+  },
+  async (i, { payer, payment }) => {
     let recipient = i.user;
-    let payer = i.options.getUser("user");
-    let payment_amount = i.options.getInteger("payment");
+    let payment_amount = parseFloat(payment);
 
+    // TODO these checks should move
     if (!payer) {
       await i.reply(`You need to specify a payer ${recipient}`);
       return;
@@ -82,8 +83,6 @@ let uoweme: Command = {
 
       await i.deferUpdate();
 
-      await i.user.send("This is a DM!");
-
       let updatedTab = await trpc.tab.addToOrCreate.mutate({
         amount: parseFloat(String(payment_amount)),
         debtorID: deptorId,
@@ -113,7 +112,7 @@ let uoweme: Command = {
       }
       await i.editReply({ content: Response, components: [] });
     });
-  },
-};
+  }
+);
 
 export default uoweme;

@@ -1,18 +1,20 @@
-import { SlashCommandBuilder } from "discord.js";
-import { Command } from "../types";
+import { ApplicationCommandOptionType as optTypes } from "discord.js";
+import makeCommand from "../lib/makeCommand";
 
-let ping: Command = {
-  command: new SlashCommandBuilder()
-    .setName("ping")
-    .setDescription("Replies with Pong!")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping")
-    ),
-
-  handler: async (i) => {
-    let target = i.options.getUser("user");
-    await i.reply({ content: `Pong! ${target}` });
+let ping = makeCommand(
+  {
+    name: "ping",
+    description: "Replies with Pong!",
+    options: {
+      user: {
+        type: optTypes.User,
+        description: "user to ping",
+      },
+    },
   },
-};
+  async (i, { user }) => {
+    await i.reply({ content: `Pong! ${user}` });
+  }
+);
 
 export default ping;

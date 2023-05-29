@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType as optTypes } from "discord.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,30 +7,25 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 
-import { Command } from "../types";
 import { getDebtorCreditorIds } from "../utils/getuserid";
 import trpc from "../trpc";
+import makeCommand from "../lib/makeCommand";
 
-let settleup: Command = {
-  command: new SlashCommandBuilder()
-    .setName("settleup")
-    .setDescription("Generate a link to pay someone")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping").setRequired(true)
-    ),
-
-  handler: async (i) => {
+let settleup = makeCommand(
+  {
+    name: "settleup",
+    description: "Generate a link to pay someone",
+    options: {
+      user: {
+        type: optTypes.User,
+        description: "user to ping",
+        required: true,
+      },
+    },
+  },
+  async (i, { user }) => {
     let client = i.user;
-    let target = i.options.getUser("user");
-
-    if (target == null) {
-      i.reply({
-        content: "You must specify who you want to settle your tab with.",
-        ephemeral: true,
-      });
-      return;
-    }
-
+    let target = user;
     const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
 
     if (debtorId == creditorId) {
@@ -109,7 +105,7 @@ let settleup: Command = {
       await i.editReply({ components: [] });
       await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
     });
-  },
-};
+  }
+);
 
 export default settleup;
