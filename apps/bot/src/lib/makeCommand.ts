@@ -18,16 +18,17 @@ type destructureArgs = <T extends Record<string, option>>(
 ) => handlerOf<T>;
 
 const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
-  let args = Object.keys(meta.options).reduce((acc, optionName) => {
-    let value = getArg(i, optionName, meta.options[optionName]!);
-    // TODO handle bad args
-    // i.e. what if its required and not present?
+  let args = Object.entries(meta.options).reduce(
+    (acc, [optionName, option]) => {
+      let value = getArg(i, optionName, option);
 
-    return {
-      ...acc,
-      [optionName]: value,
-    };
-  }, {});
+      return {
+        ...acc,
+        [optionName]: value,
+      };
+    },
+    {}
+  );
 
   return await handler(i, args as any);
 };
