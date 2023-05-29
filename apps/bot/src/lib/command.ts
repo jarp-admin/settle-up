@@ -5,7 +5,7 @@ import {
   ChatInputCommandInteraction,
   ApplicationCommandOptionType as optTypes,
 } from "discord.js";
-import { command, commandMeta, handlerOf, option } from "../types/commands";
+import { command, commandMeta, handlerOf, option } from "./types";
 
 export const toJSON = ({
   meta,
