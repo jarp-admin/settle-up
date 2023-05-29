@@ -1,27 +1,11 @@
-import { RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord-api-types/v10";
 import {
-  APIApplicationCommandOption,
   CacheType,
   ChatInputCommandInteraction,
   ApplicationCommandOptionType as optTypes,
 } from "discord.js";
 import { command, commandMeta, handlerOf, option } from "./types";
 
-export const toJSON = ({
-  meta,
-}: command): RESTPostAPIChatInputApplicationCommandsJSONBody => {
-  return {
-    ...meta,
-    options: Object.entries(meta.options).map(([k, v]) => {
-      return {
-        name: k,
-        ...v,
-      } satisfies APIApplicationCommandOption;
-    }),
-  };
-};
-
-export const makeCommand = <T extends Record<string, option>>(
+const makeCommand = <T extends Record<string, option>>(
   meta: commandMeta<T>,
   handler: handlerOf<T>
 ) => {
@@ -33,22 +17,26 @@ type destructureArgs = <T extends Record<string, option>>(
   handler: handlerOf<T>
 ) => handlerOf<T>;
 
-export const destructureArgs: destructureArgs =
-  (meta, handler) => async (i, _) => {
-    let args = Object.keys(meta.options).reduce((acc, optionName) => {
-      let value = getArg(i, optionName, meta.options[optionName]!);
-      // todo handle bad args here
-      // i.e. what if its required and not present?
+const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
+  let args = Object.keys(meta.options).reduce((acc, optionName) => {
+    let value = getArg(i, optionName, meta.options[optionName]!);
+    // TODO handle bad args
+    // i.e. what if its required and not present?
 
-      return {
-        ...acc,
-        [optionName]: value,
-      };
-    }, {});
+    return {
+      ...acc,
+      [optionName]: value,
+    };
+  }, {});
 
-    return await handler(i, args as any);
-  };
+  return await handler(i, args as any);
+};
 
+/* TODO clean up getArg
+ I know this is ugly
+ open to suggestions for fixing it
+ maybe something dictionary based?
+*/
 const getArg = (
   i: ChatInputCommandInteraction<CacheType>,
   argName: string,
@@ -75,3 +63,5 @@ const getArg = (
       return i.options.getAttachment(argName);
   }
 };
+
+export default makeCommand;
