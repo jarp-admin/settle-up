@@ -115,7 +115,9 @@ export interface commandMeta<T extends Record<string, option>> {
 }
 
 export type argsFor<T extends Record<string, option>> = {
-  [a in keyof T]: getArgType<T[a]["type"]>;
+  [arg in keyof T]: T[arg]["required"] extends true
+    ? getArgType<T[arg]["type"]>
+    : getArgType<T[arg]["type"]> | undefined;
 };
 
 export type handlerOf<T extends Record<string, option>> = (
