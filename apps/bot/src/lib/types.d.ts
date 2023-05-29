@@ -40,6 +40,7 @@ type numberOption = optionBase & {
   max?: number;
 } & (
     | {
+        // TODO infer types properly when choices are provided
         choices?: APIApplicationCommandOptionChoice<number>[];
         autocomplete?: false;
       }

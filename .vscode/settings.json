@@ -3,5 +3,15 @@
     "testclient": "test",
     "bot": "controller"
   },
-  "cSpell.words": ["daisyui", "superjson", "tailwindcss", "trpc", "turborepo"]
+  "cSpell.words": [
+    "daisyui",
+    "ioweu",
+    "leaderboard",
+    "settleup",
+    "superjson",
+    "tailwindcss",
+    "trpc",
+    "turborepo",
+    "uoweme"
+  ]
 }
