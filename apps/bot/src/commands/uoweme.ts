@@ -30,17 +30,6 @@ let uoweme = makeCommand(
     let recipient = i.user;
     let payment_amount = parseFloat(payment);
 
-    // TODO these checks should move
-    if (!payer) {
-      await i.reply(`You need to specify a payer ${recipient}`);
-      return;
-    }
-
-    if (!payment_amount) {
-      await i.reply(`You need to specify an amount ${payer}`);
-      return;
-    }
-
     if (payment_amount <= 0) {
       await i.reply({ content: "You can't input a negative number" });
       return;
@@ -49,6 +38,7 @@ let uoweme = makeCommand(
     const deptorId = await trpc.user.getUserId.query({
       discordId: payer.id,
     });
+
     if (deptorId == undefined) {
       throw new Error("No debtor selected");
     }
