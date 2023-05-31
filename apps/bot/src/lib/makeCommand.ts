@@ -1,7 +1,7 @@
 import {
   CacheType,
   ChatInputCommandInteraction,
-  ApplicationCommandOptionType as optTypes,
+  ApplicationCommandOptionType as optType,
 } from "discord.js";
 import { Option } from "./options";
 import { command, commandMeta, handlerOf } from "./types";
@@ -23,7 +23,7 @@ const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
 
   let args = Object.entries(meta.options).reduce(
     (acc, [optionName, option]) => {
-      let value = getArg(i, optionName, option);
+      let value = argGetter[option.type](i, optionName) ?? undefined;
 
       return {
         ...acc,
@@ -36,36 +36,20 @@ const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
   return await handler(i, args);
 };
 
-/* TODO clean up getArg
- I know this is ugly
- open to suggestions for fixing it
- maybe something dictionary based?
-*/
-const getArg = (
-  i: ChatInputCommandInteraction<CacheType>,
-  argName: string,
-  data: Option
-) => {
-  switch (data.type) {
-    case optTypes.Boolean:
-      return i.options.getBoolean(argName);
-    case optTypes.String:
-      return i.options.getString(argName);
-    case optTypes.Integer:
-      return i.options.getInteger(argName);
-    case optTypes.Number:
-      return i.options.getNumber(argName);
-    case optTypes.User:
-      return i.options.getUser(argName);
-    case optTypes.Role:
-      return i.options.getRole(argName);
-    case optTypes.Mentionable:
-      return i.options.getMentionable(argName);
-    case optTypes.Channel:
-      return i.options.getChannel(argName);
-    case optTypes.Attachment:
-      return i.options.getAttachment(argName);
-  }
+type i = ChatInputCommandInteraction<CacheType>;
+
+let argGetter = {
+  [optType.Boolean]: (i: i, argName: string) => i.options.getBoolean(argName),
+  [optType.String]: (i: i, argName: string) => i.options.getString(argName),
+  [optType.Integer]: (i: i, argName: string) => i.options.getInteger(argName),
+  [optType.Number]: (i: i, argName: string) => i.options.getNumber(argName),
+  [optType.User]: (i: i, argName: string) => i.options.getUser(argName),
+  [optType.Role]: (i: i, argName: string) => i.options.getRole(argName),
+  [optType.Channel]: (i: i, argName: string) => i.options.getChannel(argName),
+  [optType.Mentionable]: (i: i, argName: string) =>
+    i.options.getMentionable(argName),
+  [optType.Attachment]: (i: i, argName: string) =>
+    i.options.getAttachment(argName),
 };
 
 export default makeCommand;
