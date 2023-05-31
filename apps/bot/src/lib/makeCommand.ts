@@ -3,21 +3,24 @@ import {
   ChatInputCommandInteraction,
   ApplicationCommandOptionType as optTypes,
 } from "discord.js";
-import { command, commandMeta, handlerOf, option } from "./types";
+import { Option } from "./options";
+import { command, commandMeta, handlerOf } from "./types";
 
-const makeCommand = <T extends Record<string, option>>(
+const makeCommand = <T extends Record<string, Option>>(
   meta: commandMeta<T>,
   handler: handlerOf<T>
 ) => {
   return { meta, handler: destructureArgs(meta, handler) } as command;
 };
 
-type destructureArgs = <T extends Record<string, option>>(
+type destructureArgs = <T extends Record<string, Option>>(
   meta: commandMeta<T>,
   handler: handlerOf<T>
 ) => handlerOf<T>;
 
 const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
+  type handlerArgType = Parameters<typeof handler>[1];
+
   let args = Object.entries(meta.options).reduce(
     (acc, [optionName, option]) => {
       let value = getArg(i, optionName, option);
@@ -27,10 +30,10 @@ const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
         [optionName]: value,
       };
     },
-    {}
+    {} as handlerArgType
   );
 
-  return await handler(i, args as any);
+  return await handler(i, args);
 };
 
 /* TODO clean up getArg
@@ -41,7 +44,7 @@ const destructureArgs: destructureArgs = (meta, handler) => async (i, _) => {
 const getArg = (
   i: ChatInputCommandInteraction<CacheType>,
   argName: string,
-  data: option
+  data: Option
 ) => {
   switch (data.type) {
     case optTypes.Boolean:

@@ -1,5 +1,4 @@
 import {
-  APIApplicationCommandOptionChoice,
   APIInteractionDataResolvedChannel,
   APIInteractionDataResolvedGuildMember,
   APIRole,
@@ -19,65 +18,7 @@ import {
   VoiceChannel,
   ApplicationCommandOptionType as optTypes,
 } from "discord.js";
-
-type optionBase = { required?: boolean; description: string };
-
-type stringOption = optionBase & {
-  type: optTypes.String;
-  max_length?: number;
-  min_length?: number;
-} & (
-    | {
-        choices?: APIApplicationCommandOptionChoice<string>[];
-        autocomplete?: false;
-      }
-    | { autocomplete: true }
-  );
-
-type numberOption = optionBase & {
-  type: optTypes.Number;
-  min?: number;
-  max?: number;
-} & (
-    | {
-        // TODO infer types properly when choices are provided
-        choices?: APIApplicationCommandOptionChoice<number>[];
-        autocomplete?: false;
-      }
-    | { autocomplete: true }
-  );
-
-type integerOption = optionBase & {
-  type: optTypes.Integer;
-  min?: number;
-  max?: number;
-} & (
-    | {
-        choices?: APIApplicationCommandOptionChoice<number>[];
-        autocomplete?: false;
-      }
-    | { autocomplete: true }
-  );
-
-type booleanOption = optionBase & { type: optTypes.Boolean };
-
-type userOption = optionBase & { type: optTypes.User };
-type roleOption = optionBase & { type: optTypes.Role };
-type mentionableOption = optionBase & { type: optTypes.Mentionable };
-type channelOption = optionBase & { type: optTypes.Channel };
-
-type attachmentOption = optionBase & { type: optTypes.Attachment };
-
-type option =
-  | stringOption
-  | numberOption
-  | integerOption
-  | booleanOption
-  | userOption
-  | roleOption
-  | mentionableOption
-  | channelOption
-  | attachmentOption;
+import { Option } from "./options";
 
 type getArgType<T> = T extends optTypes.String
   ? string
@@ -108,25 +49,24 @@ type getArgType<T> = T extends optTypes.String
   ? Attachment
   : never;
 
-//*   actual interesting types:
-export interface commandMeta<T extends Record<string, option>> {
+export interface commandMeta<T extends Record<string, Option>> {
   name: string;
   description: string;
   options: T;
 }
 
-export type argsFor<T extends Record<string, option>> = {
+export type argsFor<T extends Record<string, Option>> = {
   [arg in keyof T]: T[arg]["required"] extends true
     ? getArgType<T[arg]["type"]>
     : getArgType<T[arg]["type"]> | undefined;
 };
 
-export type handlerOf<T extends Record<string, option>> = (
+export type handlerOf<T extends Record<string, Option>> = (
   i: ChatInputCommandInteraction<CacheType>,
   args: argsFor<T>
 ) => void | Promise<void>;
 
 export interface command {
-  meta: commandMeta<Record<string, option>>;
-  handler: handlerOf<Record<string, option>>;
+  meta: commandMeta<Record<string, Option>>;
+  handler: handlerOf<Record<string, Option>>;
 }
