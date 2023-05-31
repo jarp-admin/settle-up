@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType as optTypes } from "discord.js";
-
 import makeCommand from "../lib/makeCommand";
+import { StringOption } from "../lib/options";
+
 import trpc from "../trpc";
 
 const leaderboard = makeCommand(
@@ -8,14 +8,13 @@ const leaderboard = makeCommand(
     name: "leaderboard",
     description: "Shows the leaderboard for who owns the most debt",
     options: {
-      type: {
-        type: optTypes.String,
+      type: StringOption({
         description: 'Leaderboard type - either "Credit" or "Debt"',
         choices: [
           { name: "credit", value: "credit" },
           { name: "debt", value: "debt" },
         ],
-      },
+      }),
     },
   },
   async (i, { type }) => {

@@ -1,19 +1,18 @@
-import { ApplicationCommandOptionType as optTypes } from "discord.js";
-
 import makeCommand from "../lib/makeCommand";
-import trpc from "../trpc";
+import { UserOption } from "../lib/options";
 import { getDebtorCreditorIds } from "../utils/getuserid";
+
+import trpc from "../trpc";
 
 let poke = makeCommand(
   {
     name: "poke",
     description: "Reminds someone to pay their tab",
     options: {
-      user: {
-        type: optTypes.User,
+      user: UserOption({
         description: "user to ping",
         required: true,
-      },
+      }),
     },
   },
   async (i, { user }) => {

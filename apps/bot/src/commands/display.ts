@@ -1,18 +1,18 @@
-import { ApplicationCommandOptionType as optTypes } from "discord.js";
 import makeCommand from "../lib/makeCommand";
-import trpc from "../trpc";
+import { UserOption } from "../lib/options";
 import { getDebtorCreditorIds } from "../utils/getuserid";
+
+import trpc from "../trpc";
 
 export default makeCommand(
   {
     name: "display",
     description: "Shows how much you owe someone",
     options: {
-      user: {
-        type: optTypes.User,
+      user: UserOption({
         description: "User you want your debt with",
         required: true,
-      },
+      }),
     },
   },
   async (i, { user }) => {

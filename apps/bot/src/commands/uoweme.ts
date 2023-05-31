@@ -1,29 +1,23 @@
-import { ApplicationCommandOptionType as optTypes } from "discord.js";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  SlashCommandBuilder,
-} from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+
+import makeCommand from "../lib/makeCommand";
+import { StringOption, UserOption } from "../lib/options";
 
 import trpc from "../trpc";
-import makeCommand from "../lib/makeCommand";
 
 let uoweme = makeCommand(
   {
     name: "uoweme",
     description: "Add to a persons outstanding tab with you",
     options: {
-      payer: {
-        type: optTypes.User,
+      payer: UserOption({
         description: "user who owes you",
         required: true,
-      },
-      payment: {
-        type: optTypes.String,
+      }),
+      payment: StringOption({
         description: "amount to owe",
         required: true,
-      },
+      }),
     },
   },
   async (i, { payer, payment }) => {

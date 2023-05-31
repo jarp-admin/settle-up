@@ -1,26 +1,25 @@
-import { ApplicationCommandOptionType as optTypes } from "discord.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  SlashCommandBuilder,
 } from "discord.js";
 
 import { getDebtorCreditorIds } from "../utils/getuserid";
-import trpc from "../trpc";
 import makeCommand from "../lib/makeCommand";
+import { UserOption } from "../lib/options";
+
+import trpc from "../trpc";
 
 let settleup = makeCommand(
   {
     name: "settleup",
     description: "Generate a link to pay someone",
     options: {
-      user: {
-        type: optTypes.User,
+      user: UserOption({
         description: "user to ping",
         required: true,
-      },
+      }),
     },
   },
   async (i, { user }) => {
