@@ -3,6 +3,8 @@ import {
   APIInteractionDataResolvedGuildMember,
   APIRole,
   Attachment,
+  ButtonInteraction,
+  ButtonStyle,
   CacheType,
   CategoryChannel,
   ChatInputCommandInteraction,
@@ -61,12 +63,30 @@ export type argsFor<T extends Record<string, Option>> = {
     : getArgType<T[arg]["type"]> | undefined;
 };
 
+interface button {
+  style: ButtonStyle;
+  label?: string;
+  url?: string;
+  disabled?: boolean;
+  onClick: (i: ButtonInteraction<CacheType>) => void | Promise<void>;
+}
+
+interface messageResponse {
+  body: string;
+  buttons?: button[];
+  ephemeral?: boolean;
+}
+
 export type handlerOf<T extends Record<string, Option>> = (
-  i: ChatInputCommandInteraction<CacheType>,
+  caller: User,
   args: argsFor<T>
+) => string | messageResponse | Promise<string | messageResponse>;
+
+export type genericHandler = (
+  i: ChatInputCommandInteraction<CacheType>
 ) => void | Promise<void>;
 
 export interface command {
   meta: commandMeta<Record<string, Option>>;
-  handler: handlerOf<Record<string, Option>>;
+  handler: genericHandler;
 }

@@ -17,7 +17,7 @@ function registerCommands(...commands: command[]) {
     }
 
     try {
-      await command.handler(i, {});
+      await command.handler(i);
     } catch (error) {
       console.error(error);
 
