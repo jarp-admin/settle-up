@@ -5,11 +5,12 @@ import {
   EmbedBuilder,
 } from "discord.js";
 
-import { getDebtorCreditorIds } from "../utils/getuserid";
+import { getIds } from "../utils/getIds";
 import makeCommand from "../lib/makeCommand";
 import { UserOption } from "../lib/options";
 
 import trpc from "../trpc";
+import { messageResponse } from "../lib/types";
 
 let settleup = makeCommand(
   {
@@ -22,10 +23,8 @@ let settleup = makeCommand(
       }),
     },
   },
-  async (i, { user }) => {
-    let client = i.user;
-    let target = user;
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
+  async (caller, { user }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
     if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
@@ -37,16 +36,15 @@ let settleup = makeCommand(
     });
 
     if (whoOwes == undefined) {
-      i.reply({
-        content: "Neither of you owe each other any money",
+      return {
+        body: "Neither of you owe each other any money",
         ephemeral: true,
-      });
-      return;
+      } as messageResponse;
     }
 
     let payment_link;
-    let payer = whoOwes > 0 ? client : target;
-    let receiver = whoOwes > 0 ? target : client;
+    let payer = whoOwes > 0 ? caller : user;
+    let receiver = whoOwes > 0 ? user : caller;
 
     if (whoOwes > 0) {
       payment_link = await trpc.payment.getLink.query({
@@ -69,41 +67,39 @@ let settleup = makeCommand(
       .setTitle("Purchase link")
       .setURL(payment_link);
 
-    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId("payment_confirmation")
-        .setLabel("Received")
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    let res_msg = `${payer}, please pay £${Math.abs(
-      whoOwes
-    )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
-    let msg = await i.reply({
-      content: res_msg,
+    return {
+      body: `${payer}, please pay £${Math.abs(
+        whoOwes
+      )}; ${receiver}, when you receive the payment please confirm it with the button below:`,
       embeds: [Embed],
-      components: [button],
-    });
+      buttons: [
+        {
+          label: "Received",
+          style: ButtonStyle.Primary,
+          onClick: async (i) => {
+            if (i.user != receiver) {
+              await i.reply({
+                content: "Only the payer can accept the payment",
+                ephemeral: true,
+              });
+              return;
+            }
 
-    msg.createMessageComponentCollector().on("collect", async (i) => {
-      if (i.user != receiver) {
-        await i.reply({
-          content: "Only the payer can accept the payment",
-          ephemeral: true,
-        });
-        return;
-      }
+            await i.deferReply();
 
-      await i.deferUpdate();
+            const clearedTab = await trpc.tab.clear.mutate({
+              debtorID: debtorId,
+              creditorID: creditorId,
+            });
 
-      const clearedTab = await trpc.tab.clear.mutate({
-        debtorID: debtorId,
-        creditorID: creditorId,
-      });
-
-      await i.editReply({ components: [] });
-      await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
-    });
+            await i.editReply({ components: [] });
+            await i.channel?.send(
+              `${payer}, ${receiver} You're all settled up!`
+            );
+          },
+        },
+      ],
+    } as messageResponse;
   }
 );
 

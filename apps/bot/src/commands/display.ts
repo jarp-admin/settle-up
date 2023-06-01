@@ -1,6 +1,6 @@
 import makeCommand from "../lib/makeCommand";
 import { UserOption } from "../lib/options";
-import { getDebtorCreditorIds } from "../utils/getuserid";
+import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
 
@@ -15,8 +15,8 @@ export default makeCommand(
       }),
     },
   },
-  async (i, { user }) => {
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, user);
+  async (caller, { user }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
     let debt = await trpc.tab.getTab.query({
       user1ID: debtorId,
@@ -26,16 +26,10 @@ export default makeCommand(
       throw new Error("no iowethem available");
     }
 
-    let Response = "";
+    if (debt > 0) return `You owe ${user.username} £${debt}`;
 
-    if (debt > 0) {
-      Response = `You owe ${user.username} £${debt}`;
-    } else if (debt < 0) {
-      Response = `${user.username} owes you £${debt * -1}`;
-    } else {
-      Response = `You and ${user.username} are squared up`;
-    }
+    if (debt < 0) return `${user.username} owes you £${debt * -1}`;
 
-    await i.reply({ content: Response });
+    return `You and ${user.username} are squared up`;
   }
 );

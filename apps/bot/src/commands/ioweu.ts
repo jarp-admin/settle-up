@@ -1,6 +1,6 @@
 import makeCommand from "../lib/makeCommand";
 import { StringOption, UserOption } from "../lib/options";
-import { getDebtorCreditorIds } from "../utils/getuserid";
+import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
 
@@ -19,8 +19,8 @@ let ioweu = makeCommand(
       }),
     },
   },
-  async (i, { user, payment }) => {
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, user);
+  async (caller, { user, payment }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
     let updatedTab = await trpc.tab.addToOrCreate.mutate({
       amount: parseFloat(payment),
@@ -39,19 +39,15 @@ let ioweu = makeCommand(
       throw new Error("no iowe available");
     }
 
-    let x = `Added £${payment} to ${i.user.username}'s tab with ${user.username}. `;
+    let base = `Added £${payment} to ${caller.username}'s tab with ${user.username}. `;
 
-    let Response = "";
+    if (overall_tab > 0)
+      return base + `You owe ${user.username} £${overall_tab}`;
 
-    if (overall_tab > 0) {
-      Response = x + `You owe ${user.username} £${overall_tab}`;
-    } else if (overall_tab < 0) {
-      overall_tab = overall_tab * -1;
-      Response = x + `${user.username} owes you £${overall_tab}`;
-    } else {
-      Response = x + `You and ${user.username} are squared up`;
-    }
-    await i.reply({ content: Response });
+    if (overall_tab < 0)
+      return base + `${user.username} owes you £${overall_tab * -1}`;
+
+    return base + `You and ${user.username} are squared up`;
   }
 );
 

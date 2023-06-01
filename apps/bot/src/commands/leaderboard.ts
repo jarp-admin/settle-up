@@ -17,7 +17,7 @@ const leaderboard = makeCommand(
       }),
     },
   },
-  async (i, { type }) => {
+  async (caller, { type }) => {
     let leaderboard;
 
     if (type == "Debt") {
@@ -27,22 +27,16 @@ const leaderboard = makeCommand(
       console.log("hello from credit");
       leaderboard = await trpc.leaderboard.getMostCredited.query();
     } else {
-      await i.reply({
-        content:
-          'No leaderboard specified, please type either "Credit" or "Debt"',
-      });
-      return;
+      return 'No leaderboard specified, please type either "Credit" or "Debt"';
     }
 
     if (leaderboard == undefined) {
-      await i.reply({ content: "No leaderboard found" });
-      return;
+      return "No leaderboard found";
     }
 
-    let Response = "";
     console.log(leaderboard);
 
-    await i.reply({ content: Response });
+    return "";
   }
 );
 
