@@ -8,11 +8,11 @@
     "db:start": "cross-env PGPASSWORD=jarp psql -U postgres"
   },
   "dependencies": {
-    "@prisma/client": "latest"
+    "@prisma/client": "^4.15.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
     "dotenv-cli": "^7.2.1",
-    "prisma": "4.14.1"
+    "prisma": "^4.15.0"
   }
 }

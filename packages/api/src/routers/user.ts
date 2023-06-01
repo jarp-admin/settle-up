@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { handlePrismaError } from "../utils";
 
 export const userRouter = createTRPCRouter({
   getUserIdFromDiscordId: publicProcedure
@@ -9,13 +10,19 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const account = await ctx.prisma.account.findFirst({
-        where: {
-          providerAccountId: input.discordId,
-        },
-      });
+      try {
+        const account = await ctx.prisma.account.findFirstOrThrow({
+          where: {
+            providerAccountId: input.discordId,
+          },
+        });
 
-      return account?.userId;
+        return account?.userId;
+      } catch (e) {
+        if (e instanceof Error) {
+          handlePrismaError(e);
+        }
+      }
     }),
 
   updatePaypalEmail: publicProcedure
@@ -26,15 +33,21 @@ export const userRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = await ctx.prisma.user.update({
-        where: {
-          id: input.userId,
-        },
-        data: {
-          paypalEmail: input.paypalEmail,
-        },
-      });
+      try {
+        const user = await ctx.prisma.user.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            paypalEmail: input.paypalEmail,
+          },
+        });
 
-      return user;
+        return user;
+      } catch (e) {
+        if (e instanceof Error) {
+          handlePrismaError(e);
+        }
+      }
     }),
 });
