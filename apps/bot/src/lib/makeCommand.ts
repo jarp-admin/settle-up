@@ -44,13 +44,7 @@ const wrapper =
       {} as handlerArgType
     );
 
-    let raw_response = await handler(i.user, args);
-    let response: InteractionReplyOptions = {};
-
-    let map: Record<string, (i: ButtonInteraction<CacheType>) => void> = {};
-
-    if (typeof raw_response === "string") response = { content: raw_response };
-    else response = makeResponse(raw_response, map);
+    let [response, map] = makeResponse(await handler(i.user, args));
 
     let msg = await i.reply(response);
 
@@ -64,9 +58,14 @@ const wrapper =
   };
 
 function makeResponse(
-  res: messageResponse,
-  map: Record<string, (i: ButtonInteraction<CacheType>) => void>
-): InteractionReplyOptions {
+  res: string | messageResponse
+): [
+  InteractionReplyOptions,
+  Record<string, (i: ButtonInteraction<CacheType>) => void>
+] {
+  if (typeof res === "string") return [{ content: res }, {}];
+
+  let map: Record<string, (i: ButtonInteraction<CacheType>) => void> = {};
   let components: ActionRowBuilder<ButtonBuilder>[] = [];
 
   if (res.buttons)
@@ -76,11 +75,14 @@ function makeResponse(
       ),
     ];
 
-  return {
-    content: res.body,
-    ephemeral: res.ephemeral ?? false,
-    components: components,
-  };
+  return [
+    {
+      content: res.body,
+      ephemeral: res.ephemeral ?? false,
+      components: components,
+    },
+    map,
+  ];
 }
 
 function makeButton(
