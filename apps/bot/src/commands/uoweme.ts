@@ -26,11 +26,11 @@ let uoweme = makeCommand(
 
     if (payment_amount <= 0) return "You can't input a negative number";
 
-    const deptorId = await trpc.user.getUserId.query({
+    const debtorId = await trpc.user.getUserId.query({
       discordId: payer.id,
     });
 
-    if (deptorId == undefined) {
+    if (debtorId == undefined) {
       throw new Error("No debtor selected");
     }
 
@@ -60,7 +60,7 @@ let uoweme = makeCommand(
 
             let updatedTab = await trpc.tab.addToOrCreate.mutate({
               amount: parseFloat(String(payment_amount)),
-              debtorID: deptorId,
+              debtorID: debtorId,
               creditorID: creditorId,
             });
             if (updatedTab == undefined) {
@@ -68,7 +68,7 @@ let uoweme = makeCommand(
             }
 
             let overall_tab = await trpc.tab.getTab.query({
-              user1ID: deptorId,
+              user1ID: debtorId,
               user2ID: creditorId,
             });
             if (overall_tab == undefined) {
