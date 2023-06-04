@@ -2,9 +2,9 @@ import {
   APIInteractionDataResolvedChannel,
   APIInteractionDataResolvedGuildMember,
   APIRole,
+  AnySelectMenuInteraction,
   Attachment,
   ButtonInteraction,
-  ButtonStyle,
   CacheType,
   CategoryChannel,
   ChatInputCommandInteraction,
@@ -21,6 +21,7 @@ import {
   ApplicationCommandOptionType as optTypes,
 } from "discord.js";
 import { Option } from "./options";
+import { responseMessage } from "./response";
 
 type getArgType<T> = T extends optTypes.String
   ? string
@@ -63,25 +64,13 @@ export type argsFor<T extends Record<string, Option>> = {
     : getArgType<T[arg]["type"]> | undefined;
 };
 
-interface button {
-  style: ButtonStyle;
-  label?: string;
-  url?: string;
-  disabled?: boolean;
-  onClick: (i: ButtonInteraction<CacheType>) => void | Promise<void>;
-}
-
-interface messageResponse {
-  body: string;
-  buttons?: button[];
-  ephemeral?: boolean;
-}
-
 export type handlerOf<T extends Record<string, Option>> = (
   caller: User,
   args: argsFor<T>
-) => string | messageResponse | Promise<string | messageResponse>;
+) => string | responseMessage | Promise<string | responseMessage>;
 
+// note: a generic handler wraps a handlerOf<T> -
+// i.e. destructures args and implements return to reply
 export type genericHandler = (
   i: ChatInputCommandInteraction<CacheType>
 ) => void | Promise<void>;
@@ -90,3 +79,18 @@ export interface command {
   meta: commandMeta<Record<string, Option>>;
   handler: genericHandler;
 }
+
+type optionalAsyncResponse =
+  | responseMessage
+  | void
+  | Promise<responseMessage | void>;
+
+export type buttonHandler = (
+  i: ButtonInteraction<CacheType>
+) => optionalAsyncResponse;
+
+export type selectHandler = (
+  i: AnySelectMenuInteraction
+) => optionalAsyncResponse;
+
+export type componentHandler = buttonHandler | selectHandler;

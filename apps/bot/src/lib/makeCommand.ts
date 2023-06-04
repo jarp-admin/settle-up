@@ -1,21 +1,14 @@
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
+  AnySelectMenuInteraction,
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
-  InteractionReplyOptions,
   ApplicationCommandOptionType as optType,
 } from "discord.js";
-import { v4 as uuid } from "uuid";
+
 import { Option } from "./options";
-import {
-  button,
-  command,
-  commandMeta,
-  handlerOf,
-  messageResponse,
-} from "./types";
+import { responseMessage } from "./response";
+import { command, commandMeta, handlerOf } from "./types";
 
 const makeCommand = <T extends Record<string, Option>>(
   meta: commandMeta<T>,
@@ -44,60 +37,37 @@ const wrapper =
       {} as handlerArgType
     );
 
-    let [response, map] = makeResponse(await handler(i.user, args));
-
-    let msg = await i.reply(response);
-
-    if (Object.keys(map)) {
-      msg.createMessageComponentCollector().on("collect", (i) => {
-        let cb = map[i.customId];
-        if (!cb) return;
-        cb(i as ButtonInteraction<CacheType>);
-      });
-    }
+    let res = wrapString(await handler(i.user, args));
+    reply(i, res);
   };
 
-function makeResponse(
-  res: string | messageResponse
-): [
-  InteractionReplyOptions,
-  Record<string, (i: ButtonInteraction<CacheType>) => void>
-] {
-  if (typeof res === "string") return [{ content: res }, {}];
-
-  let map: Record<string, (i: ButtonInteraction<CacheType>) => void> = {};
-  let components: ActionRowBuilder<ButtonBuilder>[] = [];
-
-  if (res.buttons)
-    components = [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        res.buttons.map((e) => makeButton(e, map))
-      ),
-    ];
-
-  return [
-    {
-      content: res.body,
-      ephemeral: res.ephemeral ?? false,
-      components: components,
-    },
-    map,
-  ];
+function wrapString(res: string | responseMessage): responseMessage {
+  return typeof res === "string" ? [{ content: res }, {}] : res;
 }
 
-function makeButton(
-  data: button,
-  map: Record<string, (i: ButtonInteraction<CacheType>) => void>
-): ButtonBuilder {
-  let id = uuid();
-  map[id] = data.onClick;
-  let btn = new ButtonBuilder().setStyle(data.style).setCustomId(id);
+type replyable =
+  | ChatInputCommandInteraction<CacheType>
+  | AnySelectMenuInteraction<CacheType>
+  | ButtonInteraction<CacheType>;
 
-  if (data.label) btn.setLabel(data.label);
-  if (data.disabled) btn.setDisabled(data.disabled);
-  if (data.url) btn.setURL(data.url);
+async function reply(i: replyable, [text, map]: responseMessage) {
+  let msg = await i.reply(text);
 
-  return btn;
+  if (Object.keys(map)) {
+    msg.createMessageComponentCollector().on("collect", async (i) => {
+      if (i.isAnySelectMenu()) {
+        i.values;
+      }
+      let cb = map[i.customId];
+      if (!cb) return;
+
+      // if this goes wrong, the world is ending
+      // but also, any casting is evil
+      // maybe try to remove?
+      let response = await cb(i as any);
+      if (response) await reply(i, response);
+    });
+  }
 }
 
 let argGetter = {
