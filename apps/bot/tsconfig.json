@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./dist/buildInfo.json",
+    "target": "ES2021",
     "rootDir": "./src",
     "outDir": "./dist"
   }
