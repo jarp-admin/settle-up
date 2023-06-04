@@ -1,16 +1,10 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonInteraction,
-  ButtonStyle,
-  CacheType,
-} from "discord.js";
+import { ButtonInteraction, ButtonStyle, CacheType } from "discord.js";
 
 import makeCommand from "../lib/makeCommand";
 import { StringOption, UserOption } from "../lib/options";
 
 import trpc from "../trpc";
-import { messageResponse } from "../lib/types";
+import { Button, Message } from "../lib/response";
 
 let uoweme = makeCommand(
   {
@@ -47,6 +41,7 @@ let uoweme = makeCommand(
       throw new Error("No creditor selected");
     }
 
+    // TODO refactor with R2R
     let buttonHandler = async (i: ButtonInteraction<CacheType>) => {
       if (i.user != payer) {
         await i.reply({
@@ -88,16 +83,20 @@ let uoweme = makeCommand(
       await i.editReply({ content: Response, components: [] });
     };
 
-    return {
-      body: `Hey ${payer}, ${caller.username} wants you to pay £${payment_amount}. Is this OK?`,
-      buttons: [
-        {
-          label: "yes",
-          style: ButtonStyle.Danger,
-          onClick: buttonHandler,
+    return Message(
+      `Hey ${payer}, ${caller.username} wants you to pay £${payment_amount}. Is this OK?`,
+      {
+        components: {
+          row1: [
+            Button({
+              label: "yes",
+              style: "danger",
+              onClick: buttonHandler,
+            }),
+          ],
         },
-      ],
-    } as messageResponse;
+      }
+    );
   }
 );
 

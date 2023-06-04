@@ -5,5 +5,7 @@
     "target": "ES2021",
     "rootDir": "./src",
     "outDir": "./dist"
-  }
+  },
+  "include": ["./src/**/*"],
+  "ts-node": { "files": true }
 }
