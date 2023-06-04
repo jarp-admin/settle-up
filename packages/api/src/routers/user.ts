@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
-import { handlePrismaError } from "../utils";
+import { TRPCError, createTRPCRouter, publicProcedure } from "../trpc";
+import { fetchOrUpdateErrorHandler } from "../utils";
+import { Prisma } from "database";
 
 export const userRouter = createTRPCRouter({
   getUserIdFromDiscordId: publicProcedure
@@ -20,7 +21,10 @@ export const userRouter = createTRPCRouter({
         return account?.userId;
       } catch (e) {
         if (e instanceof Error) {
-          handlePrismaError(e);
+          fetchOrUpdateErrorHandler(
+            e,
+            "No user with this discordId was found."
+          );
         }
       }
     }),
@@ -46,7 +50,10 @@ export const userRouter = createTRPCRouter({
         return user;
       } catch (e) {
         if (e instanceof Error) {
-          handlePrismaError(e);
+          fetchOrUpdateErrorHandler(
+            e,
+            "No account was found with this userId."
+          );
         }
       }
     }),
