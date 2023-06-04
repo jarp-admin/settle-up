@@ -15,7 +15,7 @@ export type responseMessage = [InteractionReplyOptions, handlerMap];
 
 type messageFactory = (
   text: string,
-  objs: {
+  objs?: {
     embeds?: APIEmbed[];
     components?: {
       row1?: messageComponent[];
@@ -92,15 +92,15 @@ export let Button =
   ({
     label,
     style,
-    handler,
+    onClick,
   }: {
     label: string;
     style: buttonType;
-    handler: buttonHandler;
+    onClick: buttonHandler;
   }) =>
   (map: handlerMap) => {
     let id = uuid();
-    map[id] = handler;
+    map[id] = onClick;
 
     let btn = {
       type: 2, //i.e. button

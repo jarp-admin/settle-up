@@ -41,10 +41,6 @@ const wrapper =
     reply(i, res);
   };
 
-function wrapString(res: string | responseMessage): responseMessage {
-  return typeof res === "string" ? [{ content: res }, {}] : res;
-}
-
 type replyable =
   | ChatInputCommandInteraction<CacheType>
   | AnySelectMenuInteraction<CacheType>
@@ -65,9 +61,13 @@ async function reply(i: replyable, [text, map]: responseMessage) {
       // but also, any casting is evil
       // maybe try to remove?
       let response = await cb(i as any);
-      if (response) await reply(i, response);
+      if (response) await reply(i, wrapString(response));
     });
   }
+}
+
+function wrapString(res: string | responseMessage): responseMessage {
+  return typeof res === "string" ? [{ content: res }, {}] : res;
 }
 
 let argGetter = {

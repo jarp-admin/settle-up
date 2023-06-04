@@ -82,8 +82,9 @@ export interface command {
 
 type optionalAsyncResponse =
   | responseMessage
+  | string
   | void
-  | Promise<responseMessage | void>;
+  | Promise<responseMessage | string | void>;
 
 export type buttonHandler = (
   i: ButtonInteraction<CacheType>
