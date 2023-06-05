@@ -1,7 +1,7 @@
 import { Prisma } from "database";
 import { TRPCError } from "../trpc";
 
-const fetchOrUpdateErrorHandler = (prismaError: Error) => {
+const prismaErrorHandler = (prismaError: Error) => {
   if (prismaError instanceof Prisma.PrismaClientKnownRequestError) {
     if (prismaError.code === "P2025") {
       throw new TRPCError({
@@ -22,4 +22,4 @@ const fetchOrUpdateErrorHandler = (prismaError: Error) => {
     });
   }
 };
-export default fetchOrUpdateErrorHandler;
+export default prismaErrorHandler;

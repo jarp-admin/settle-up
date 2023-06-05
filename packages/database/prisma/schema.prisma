@@ -35,7 +35,7 @@ model Tab {
   debtorID   String // owes money     (from)
   creditorID String // is owed money  (to)
 
-  @@id([debtorID, creditorID])
+  @@id([debtorID, creditorID], name: "debtorAndCreditor")
   @@unique([debtorID, creditorID])
   @@index([debtorID])
   @@index([creditorID])

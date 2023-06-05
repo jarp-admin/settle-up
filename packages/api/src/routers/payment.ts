@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePaypalLink } from "../utils";
+import { TRPCError, createTRPCRouter, publicProcedure } from "../trpc";
+import { generatePaypalLink, prismaErrorHandler } from "../utils";
 
 export const paymentRouter = createTRPCRouter({
   getLink: publicProcedure
@@ -11,39 +11,49 @@ export const paymentRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const tab = await ctx.prisma.tab.findFirst({
-        where: {
-          debtorID: input.debtorID,
-          creditorID: input.creditorID,
-        },
-      });
+      try {
+        const tab = await ctx.prisma.tab.findFirstOrThrow({
+          where: {
+            debtorID: input.debtorID,
+            creditorID: input.creditorID,
+          },
+        });
 
-      const paymentAmount = tab?.amount;
-      if (paymentAmount == undefined) {
-        return;
+        const paymentAmount = tab?.amount;
+
+        const user = await ctx.prisma.user.findFirstOrThrow({
+          where: {
+            id: input.creditorID,
+          },
+        });
+
+        const paypalEmail = user?.paypalEmail;
+        if (!paypalEmail) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message:
+              "This user has not provided an email address associated with their paypal account.",
+          });
+        }
+
+        const settledTab = await ctx.prisma.tab.update({
+          where: {
+            debtorAndCreditor: {
+              debtorID: input.creditorID,
+              creditorID: input.debtorID,
+            },
+          },
+          data: {
+            settled: true,
+            amount: 0,
+          },
+        });
+
+        return generatePaypalLink(paymentAmount, "GBP", paypalEmail);
+      } catch (e) {
+        if (e instanceof Error) {
+          prismaErrorHandler(e);
+        }
       }
-
-      const user = await ctx.prisma.user.findFirst({
-        where: {
-          id: input.creditorID,
-        },
-      });
-
-      const paypalEmail = user?.paypalEmail;
-      if (!paypalEmail) {
-        return;
-      }
-
-      const settledTab = await ctx.prisma.tab.updateMany({
-        where: {
-          debtorID: input.debtorID,
-          creditorID: input.creditorID,
-        },
-        data: {
-          settled: true,
-        },
-      });
-
-      return generatePaypalLink(paymentAmount, "GBP", paypalEmail);
     }),
 });

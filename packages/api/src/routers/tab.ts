@@ -1,13 +1,12 @@
 import { z } from "zod";
 import { TRPCError, createTRPCRouter, publicProcedure } from "../trpc";
-import { fetchOrUpdateErrorHandler } from "../utils";
-import { Prisma } from "database";
+import { prismaErrorHandler } from "../utils";
 
 export const tabRouter = createTRPCRouter({
   getTab: publicProcedure
     .input(
       z.object({
-        deptorId: z.string(),
+        debtorId: z.string(),
         creditorId: z.string(),
       })
     )
@@ -15,7 +14,7 @@ export const tabRouter = createTRPCRouter({
       try {
         const tab = await ctx.prisma.tab.findFirstOrThrow({
           where: {
-            debtorID: input.deptorId,
+            debtorID: input.debtorId,
             creditorID: input.creditorId,
           },
         });
@@ -23,7 +22,7 @@ export const tabRouter = createTRPCRouter({
         return tab.amount;
       } catch (e) {
         if (e instanceof Error) {
-          fetchOrUpdateErrorHandler(e);
+          prismaErrorHandler(e);
         }
       }
     }),
@@ -49,15 +48,15 @@ export const tabRouter = createTRPCRouter({
           });
         }
 
-        const deptorTo = all_tabs.filter((t) => t.debtorID === input.userID);
+        const debtorTo = all_tabs.filter((t) => t.debtorID === input.userID);
         const creditorTo = all_tabs.filter(
           (t) => t.creditorID === input.userID
         );
 
-        return { deptorTo, creditorTo };
+        return { debtorTo, creditorTo };
       } catch (e) {
         if (e instanceof Error) {
-          fetchOrUpdateErrorHandler(e);
+          prismaErrorHandler(e);
         }
       }
     }),
@@ -81,9 +80,76 @@ export const tabRouter = createTRPCRouter({
       const inverseTabAmount = inverseTab?.amount;
 
       if (!inverseTabAmount || inverseTabAmount == 0) {
-        // increment or create tab
+        const newTab = await ctx.prisma.tab.upsert({
+          where: {
+            debtorAndCreditor: {
+              debtorID: input.debtorID,
+              creditorID: input.creditorID,
+            },
+          },
+          create: {
+            debtorID: input.debtorID,
+            creditorID: input.creditorID,
+            amount: input.amount,
+          },
+          update: {
+            amount: {
+              increment: input.amount,
+            },
+          },
+        });
+
+        return newTab;
       } else if (inverseTabAmount > 0) {
-        // update inversetab and maybe increment or create tab
+        if (inverseTabAmount >= input.amount) {
+          const newInverseTab = await ctx.prisma.tab.update({
+            where: {
+              debtorAndCreditor: {
+                debtorID: input.creditorID,
+                creditorID: input.debtorID,
+              },
+            },
+            data: {
+              amount: {
+                decrement: input.amount,
+              },
+            },
+          });
+          return inverseTab;
+        } else {
+          const newInverseTab = await ctx.prisma.tab.update({
+            where: {
+              debtorAndCreditor: {
+                debtorID: input.creditorID,
+                creditorID: input.debtorID,
+              },
+            },
+            data: {
+              amount: 0,
+            },
+          });
+
+          const newTab = await ctx.prisma.tab.upsert({
+            where: {
+              debtorAndCreditor: {
+                debtorID: input.debtorID,
+                creditorID: input.creditorID,
+              },
+            },
+            create: {
+              debtorID: input.debtorID,
+              creditorID: input.creditorID,
+              amount: input.amount,
+            },
+            update: {
+              amount: {
+                increment: input.amount,
+              },
+            },
+          });
+
+          return newTab;
+        }
       }
     }),
 
@@ -96,10 +162,12 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        const clearedTab = await ctx.prisma.tab.updateMany({
+        const clearedTab = await ctx.prisma.tab.update({
           where: {
-            debtorID: input.debtorID,
-            creditorID: input.creditorID,
+            debtorAndCreditor: {
+              debtorID: input.debtorID,
+              creditorID: input.creditorID,
+            },
           },
           data: {
             amount: 0,
@@ -108,7 +176,7 @@ export const tabRouter = createTRPCRouter({
         return clearedTab;
       } catch (e) {
         if (e instanceof Error) {
-          fetchOrUpdateErrorHandler(e);
+          prismaErrorHandler(e);
         }
       }
     }),
