@@ -1,4 +1,4 @@
-import { fetchOrUpdateErrorHandler, getDateDiff } from "../utils";
+import { prismaErrorHandler, getDateDiff } from "../utils";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const leaderboardRouter = createTRPCRouter({
@@ -21,7 +21,7 @@ export const leaderboardRouter = createTRPCRouter({
       return [...userDebtMap.entries()].sort((a, b) => b[1] - a[1]);
     } catch (e) {
       if (e instanceof Error) {
-        fetchOrUpdateErrorHandler(e);
+        prismaErrorHandler(e);
       }
     }
   }),
@@ -45,7 +45,7 @@ export const leaderboardRouter = createTRPCRouter({
       return new Map([...userCreditMap.entries()].sort((a, b) => a[1] - b[1]));
     } catch (e) {
       if (e instanceof Error) {
-        fetchOrUpdateErrorHandler(e);
+        prismaErrorHandler(e);
       }
     }
   }),
@@ -81,7 +81,7 @@ export const leaderboardRouter = createTRPCRouter({
       return userDebtHistoryMap;
     } catch (e) {
       if (e instanceof Error) {
-        fetchOrUpdateErrorHandler(e);
+        prismaErrorHandler(e);
       }
     }
   }),
