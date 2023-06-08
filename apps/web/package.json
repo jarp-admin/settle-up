@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "dotenv -e ../../.env echo 'broken'",
-    "dev": "dotenv -e ../../.env next dev",
-    "lint": "dotenv -e ../../.env next lint",
-    "start": "dotenv -e ../../.env next start"
+    "build": "echo 'broken'",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.5",
