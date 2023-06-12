@@ -8,11 +8,11 @@
     "build": "tsup ./src/index.ts ./src/bin.ts --format cjs,esm --dts --onSuccess \"tsc --emitDeclarationOnly --declaration\" "
   },
   "dependencies": {
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "tsup": "^6.7.0"
   },
   "devDependencies": {
     "dotenv-cli": "^7.2.1",
-    "tsup": "^6.7.0",
     "typescript": "^5.0.3"
   }
 }
