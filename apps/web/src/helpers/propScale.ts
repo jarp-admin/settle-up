@@ -1,9 +1,9 @@
 function propScale(data: number[]) {
-  let max = Math.max(...data);
-  let min = Math.min(...data);
+  const max = Math.max(...data);
+  const min = Math.min(...data);
 
-  let m = 1 / (max - min);
-  let c = -m * min;
+  const m = 1 / (max - min);
+  const c = -m * min;
   return (x: number) => m * x + c;
 }
 

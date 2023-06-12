@@ -5,9 +5,9 @@
   "license": "ISC",
   "author": "JakeTrevor <Jacob.Trevor234@gmail.com>",
   "scripts": {
-    "build": "dotenv -e ../../.env tsc",
-    "deploy": "dotenv -e ../../.env ts-node ./src/deploy_commands.ts",
-    "dev": "dotenv -e ../../.env nodemon ./src/index.ts"
+    "build": "tsc",
+    "deploy": "ts-node ./src/deploy_commands.ts",
+    "dev": "nodemon ./src/index.ts"
   },
   "dependencies": {
     "@trpc/client": "^10.27.1",
