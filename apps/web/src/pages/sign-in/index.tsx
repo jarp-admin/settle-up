@@ -2,8 +2,8 @@ import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { SignIn } from "~/components";
 
-const sign: NextPage = () => {
-  let { data: session } = useSession();
+const Sign: NextPage = () => {
+  const { data: session } = useSession();
   return (
     <div className="flex h-screen items-center justify-center bg-slate-950">
       <div>
@@ -20,4 +20,4 @@ const sign: NextPage = () => {
   );
 };
 
-export default sign;
+export default Sign;

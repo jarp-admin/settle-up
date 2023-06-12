@@ -6,14 +6,14 @@ interface props {
 }
 
 const Graph: FC<props> = ({ data }) => {
-  let scale = propScale([...data, 0]);
-  let tickSize = data.length;
+  const scale = propScale([...data, 0]);
+  const tickSize = data.length;
 
   let path = data.flatMap((e, i, arr) => {
-    let prev: number[][] = [];
+    const prev: number[][] = [];
     if (i != 0) {
       if (arr[i - 1] != e) {
-        let x = i * tickSize;
+        const x = i * tickSize;
 
         let y = arr[i - 1] || 0;
         y = 100 - 90 * scale(y);
@@ -21,8 +21,8 @@ const Graph: FC<props> = ({ data }) => {
       }
     }
 
-    let x = i * tickSize;
-    let y = 100 - 90 * scale(e);
+    const x = i * tickSize;
+    const y = 100 - 90 * scale(e);
 
     return [...prev, [x, y]];
   });

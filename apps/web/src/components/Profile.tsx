@@ -2,17 +2,18 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import type { FC } from "react";
 import SignIn from "./SignIn";
+import Image from "next/image";
 
 const Profile: FC = () => {
-  let { data: session } = useSession();
-  let user = session?.user;
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <>
       {user ? (
         <div className="dropdown-end dropdown">
           <label tabIndex={0} className="btn-link btn">
-            <img
+            <Image
               className="rounded-full object-cover object-center"
               alt="Profile Picture"
               width={60}
