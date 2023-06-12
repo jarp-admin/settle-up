@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getDateDiff } from "../utils";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
@@ -6,7 +7,6 @@ export const leaderboardRouter = createTRPCRouter({
     const allUsers = await ctx.prisma.user.findMany({
       include: { debts: true },
     });
-    // @ts-ignore
     const userDebtMap = allUsers.reduce((acc, user) => {
       let totalDebt = user.debts.reduce((prevDebt, tab) => {
         return prevDebt + tab.amount;
