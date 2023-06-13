@@ -1,36 +1,23 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder,
-  SlashCommandBuilder,
-} from "discord.js";
+import makeCommand from "../lib/makeCommand";
+import { UserOption } from "../lib/options";
+import { getIds } from "../utils/getIds";
 
-import { Command } from "../types";
-import { getDebtorCreditorIds } from "../utils/getuserid";
+import { Button, Embed, Ephemeral, Message } from "../lib/response";
 import trpc from "../trpc";
 
-let settleup: Command = {
-  command: new SlashCommandBuilder()
-    .setName("settleup")
-    .setDescription("Generate a link to pay someone")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping").setRequired(true)
-    ),
-
-  handler: async (i) => {
-    let client = i.user;
-    let target = i.options.getUser("user");
-
-    if (target == null) {
-      i.reply({
-        content: "You must specify who you want to settle your tab with.",
-        ephemeral: true,
-      });
-      return;
-    }
-
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
+let settleup = makeCommand(
+  {
+    name: "settleup",
+    description: "Generate a link to pay someone",
+    options: {
+      user: UserOption({
+        description: "user to ping",
+        required: true,
+      }),
+    },
+  },
+  async (caller, { user }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
     if (debtorId == creditorId) {
       throw new Error("Debtor and Creditor are the same");
@@ -41,17 +28,12 @@ let settleup: Command = {
       user2ID: creditorId,
     });
 
-    if (whoOwes == undefined) {
-      i.reply({
-        content: "Neither of you owe each other any money",
-        ephemeral: true,
-      });
-      return;
-    }
+    if (whoOwes == undefined)
+      return Ephemeral("Neither of you owe each other any money");
 
     let payment_link;
-    let payer = whoOwes > 0 ? client : target;
-    let receiver = whoOwes > 0 ? target : client;
+    let payer = whoOwes > 0 ? caller : user;
+    let receiver = whoOwes > 0 ? user : caller;
 
     if (whoOwes > 0) {
       payment_link = await trpc.payment.getLink.query({
@@ -69,47 +51,48 @@ let settleup: Command = {
       throw new Error("no payment link available");
     }
 
-    const Embed = new EmbedBuilder()
-      .setColor(0x0099ff)
-      .setTitle("Purchase link")
-      .setURL(payment_link);
+    // const Embed = new EmbedBuilder()
+    //   .setColor(0x0099ff)
+    //   .setTitle("Purchase link")
+    //   .setURL(payment_link);
 
-    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId("payment_confirmation")
-        .setLabel("Received")
-        .setStyle(ButtonStyle.Primary)
-    );
+    return Message(
+      `${payer}, please pay £${Math.abs(
+        whoOwes
+      )}; ${receiver}, when you receive the payment please confirm it with the button below:`,
+      {
+        embeds: [
+          Embed({
+            color: 0x0099ff,
+            title: "Purchase link",
+            url: payment_link,
+          }),
+        ],
+        components: {
+          row1: [
+            Button({
+              label: "Received",
+              style: "primary",
+              onClick: async (i) => {
+                if (i.user != receiver)
+                  return Ephemeral("Only the payer can accept the payment");
 
-    let res_msg = `${payer}, please pay £${Math.abs(
-      whoOwes
-    )}; ${receiver}, when you receive the payment please confirm it with the button below:`;
-    let msg = await i.reply({
-      content: res_msg,
-      embeds: [Embed],
-      components: [button],
-    });
+                await i.deferReply();
 
-    msg.createMessageComponentCollector().on("collect", async (i) => {
-      if (i.user != receiver) {
-        await i.reply({
-          content: "Only the payer can accept the payment",
-          ephemeral: true,
-        });
-        return;
+                const clearedTab = await trpc.tab.clear.mutate({
+                  debtorID: debtorId,
+                  creditorID: creditorId,
+                });
+
+                await i.editReply({ components: [] });
+                return `${payer}, ${receiver} You're all settled up!`;
+              },
+            }),
+          ],
+        },
       }
-
-      await i.deferUpdate();
-
-      const clearedTab = await trpc.tab.clear.mutate({
-        debtorID: debtorId,
-        creditorID: creditorId,
-      });
-
-      await i.editReply({ components: [] });
-      await i.channel?.send(`${payer}, ${receiver} You're all settled up!`);
-    });
-  },
-};
+    );
+  }
+);
 
 export default settleup;

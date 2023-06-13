@@ -1,47 +1,35 @@
-import { SlashCommandBuilder } from "discord.js";
-
-import { Command } from "../types";
+import makeCommand from "../lib/makeCommand";
+import { UserOption } from "../lib/options";
+import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
-import { getDebtorCreditorIds } from "../utils/getuserid";
 
-let display: Command = {
-  command: new SlashCommandBuilder()
-    .setName("display")
-    .setDescription("Shows how much you owe someone")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to ping").setRequired(true)
-    ),
+export default makeCommand(
+  {
+    name: "display",
+    description: "Shows how much you owe someone",
+    options: {
+      user: UserOption({
+        description: "User you want your debt with",
+        required: true,
+      }),
+    },
+  },
+  async (caller, { user }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
-  handler: async (i) => {
-    let target = i.options.getUser("user");
-    if (target == null) {
-      return;
-    }
-
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
-
-    let iowethem = await trpc.tab.getTab.query({
+    let debt = await trpc.tab.getTab.query({
       user1ID: debtorId,
       user2ID: creditorId,
     });
-    if (iowethem == undefined) {
+    if (debt == undefined) {
       throw new Error("no iowethem available");
     }
 
-    let Response = "";
+    if (debt > 0) return `You owe ${user.username} £${debt}`;
 
-    if (iowethem > 0) {
-      Response = `You owe ${target.username} £${iowethem}`;
-    } else if (iowethem < 0) {
-      iowethem = iowethem * -1;
-      Response = `${target.username} owes you £${iowethem}`;
-    } else {
-      Response = `You and ${target.username} are squared up`;
-    }
+    if (debt < 0) return `${user.username} owes you £${debt * -1}`;
 
-    await i.reply({ content: Response });
-  },
-};
-
-export default display;
+    return `You and ${user.username} are squared up`;
+  }
+);

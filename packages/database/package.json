@@ -4,8 +4,7 @@
   "types": "./index.ts",
   "scripts": {
     "build": "prisma generate",
-    "db:push": "prisma db push --skip-generate",
-    "db:start": "cross-env PGPASSWORD=jarp psql -U postgres"
+    "db:push": "prisma db push --skip-generate"
   },
   "dependencies": {
     "@prisma/client": "latest"

@@ -1,77 +1,48 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  SlashCommandBuilder,
-} from "discord.js";
+import { ButtonInteraction, ButtonStyle, CacheType } from "discord.js";
+
+import makeCommand from "../lib/makeCommand";
+import { StringOption, UserOption } from "../lib/options";
 
 import trpc from "../trpc";
-import { Command } from "../types";
+import { Button, Message } from "../lib/response";
 
-let uoweme: Command = {
-  command: new SlashCommandBuilder()
-    .setName("uoweme")
-    .setDescription("Add to a persons outstanding tab with you")
-    .addUserOption((option) =>
-      option
-        .setName("user")
-        .setDescription("user who owes you owe")
-        .setRequired(true)
-    )
-    .addIntegerOption((option) =>
-      option
-        .setName("payment")
-        .setDescription("amount to owe")
-        .setRequired(true)
-    ),
+let uoweme = makeCommand(
+  {
+    name: "uoweme",
+    description: "Add to a persons outstanding tab with you",
+    options: {
+      payer: UserOption({
+        description: "user who owes you",
+        required: true,
+      }),
+      payment: StringOption({
+        description: "amount to owe",
+        required: true,
+      }),
+    },
+  },
+  async (caller, { payer, payment }) => {
+    let payment_amount = parseFloat(payment);
 
-  handler: async (i) => {
-    let recipient = i.user;
-    let payer = i.options.getUser("user");
-    let payment_amount = i.options.getInteger("payment");
+    if (payment_amount <= 0) return "You can't input a negative number";
 
-    if (!payer) {
-      await i.reply(`You need to specify a payer ${recipient}`);
-      return;
-    }
-
-    if (!payment_amount) {
-      await i.reply(`You need to specify an amount ${payer}`);
-      return;
-    }
-
-    if (payment_amount <= 0) {
-      await i.reply({ content: "You can't input a negative number" });
-      return;
-    }
-
-    const deptorId = await trpc.user.getUserId.query({
+    const debtorId = await trpc.user.getUserId.query({
       discordId: payer.id,
     });
-    if (deptorId == undefined) {
+
+    if (debtorId == undefined) {
       throw new Error("No debtor selected");
     }
 
     const creditorId = await trpc.user.getUserId.query({
-      discordId: recipient.id,
+      discordId: caller.id,
     });
     if (creditorId == undefined) {
       throw new Error("No creditor selected");
     }
 
-    const button = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`payment_valid`)
-        .setLabel("yes")
-        .setStyle(ButtonStyle.Danger)
-    );
-
-    let msg = await i.reply({
-      content: `Hey ${payer}, ${recipient.username} wants you to pay £${payment_amount}. Is this OK?`,
-      components: [button],
-    });
-
-    msg.createMessageComponentCollector().on("collect", async (i) => {
+    // TODO refactor with R2R
+    let buttonHandler = async (i: ButtonInteraction<CacheType>) => {
       if (i.user != payer) {
         await i.reply({
           content: "Only the payer can accept the payment",
@@ -82,11 +53,9 @@ let uoweme: Command = {
 
       await i.deferUpdate();
 
-      await i.user.send("This is a DM!");
-
       let updatedTab = await trpc.tab.addToOrCreate.mutate({
         amount: parseFloat(String(payment_amount)),
-        debtorID: deptorId,
+        debtorID: debtorId,
         creditorID: creditorId,
       });
       if (updatedTab == undefined) {
@@ -94,26 +63,41 @@ let uoweme: Command = {
       }
 
       let overall_tab = await trpc.tab.getTab.query({
-        user1ID: deptorId,
+        user1ID: debtorId,
         user2ID: creditorId,
       });
       if (overall_tab == undefined) {
         throw new Error("cannot get overall tab");
       }
 
-      let x = `Added £${payment_amount} to ${payer.username}'s tab with ${recipient.username}. `;
+      let x = `Added £${payment_amount} to ${payer.username}'s tab with ${caller.username}. `;
       let Response = "";
       if (overall_tab > 0) {
-        Response = x + `You owe ${recipient.username} £${overall_tab}`;
+        Response = x + `You owe ${caller.username} £${overall_tab}`;
       } else if (overall_tab < 0) {
         overall_tab = overall_tab * -1;
-        Response = x + `${recipient.username} owes you £${overall_tab}`;
+        Response = x + `${caller.username} owes you £${overall_tab}`;
       } else {
-        Response = x + `You and ${recipient.username} are squared up`;
+        Response = x + `You and ${caller.username} are squared up`;
       }
       await i.editReply({ content: Response, components: [] });
-    });
-  },
-};
+    };
+
+    return Message(
+      `Hey ${payer}, ${caller.username} wants you to pay £${payment_amount}. Is this OK?`,
+      {
+        components: {
+          row1: [
+            Button({
+              label: "yes",
+              style: "danger",
+              onClick: buttonHandler,
+            }),
+          ],
+        },
+      }
+    );
+  }
+);
 
 export default uoweme;

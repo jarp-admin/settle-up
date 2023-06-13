@@ -1,35 +1,26 @@
-import { SlashCommandBuilder } from "discord.js";
-
-import { Command } from "../types";
+import makeCommand from "../lib/makeCommand";
+import { StringOption, UserOption } from "../lib/options";
+import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
-import { getDebtorCreditorIds } from "../utils/getuserid";
 
-let ioweu: Command = {
-  command: new SlashCommandBuilder()
-    .setName("ioweu")
-    .setDescription("Add to your outstanding tab with a person")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("user to owe").setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
-        .setName("payment")
-        .setDescription("amount to owe")
-        .setRequired(true)
-    ),
-
-  handler: async (i) => {
-    let payment = i.options.getString("payment");
-    if (payment == null) {
-      return;
-    }
-    let target = i.options.getUser("user");
-    if (target == null) {
-      return;
-    }
-
-    const { debtorId, creditorId } = await getDebtorCreditorIds(i, target);
+let ioweu = makeCommand(
+  {
+    name: "ioweu",
+    description: "Add to your outstanding tab with a person",
+    options: {
+      user: UserOption({
+        description: "user to owe",
+        required: true,
+      }),
+      payment: StringOption({
+        description: "amount to owe",
+        required: true,
+      }),
+    },
+  },
+  async (caller, { user, payment }) => {
+    const { debtorId, creditorId } = await getIds(caller, user);
 
     let updatedTab = await trpc.tab.addToOrCreate.mutate({
       amount: parseFloat(payment),
@@ -48,20 +39,16 @@ let ioweu: Command = {
       throw new Error("no iowe available");
     }
 
-    let x = `Added £${payment} to ${i.user.username}'s tab with ${target.username}. `;
+    let base = `Added £${payment} to ${caller.username}'s tab with ${user.username}. `;
 
-    let Response = "";
+    if (overall_tab > 0)
+      return base + `You owe ${user.username} £${overall_tab}`;
 
-    if (overall_tab > 0) {
-      Response = x + `You owe ${target.username} £${overall_tab}`;
-    } else if (overall_tab < 0) {
-      overall_tab = overall_tab * -1;
-      Response = x + `${target.username} owes you £${overall_tab}`;
-    } else {
-      Response = x + `You and ${target.username} are squared up`;
-    }
-    await i.reply({ content: Response });
-  },
-};
+    if (overall_tab < 0)
+      return base + `${user.username} owes you £${overall_tab * -1}`;
+
+    return base + `You and ${user.username} are squared up`;
+  }
+);
 
 export default ioweu;
