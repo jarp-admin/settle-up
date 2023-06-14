@@ -23,7 +23,7 @@ export default makeCommand(
       user2ID: creditorId,
     });
     if (debt == undefined) {
-      throw new Error("no iowethem available");
+      return `You and ${user.username} are squared up`;
     }
 
     if (debt > 0) return `You owe ${user.username} £${debt}`;
