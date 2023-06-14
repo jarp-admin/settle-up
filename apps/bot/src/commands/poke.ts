@@ -3,6 +3,7 @@ import { UserOption } from "../lib/options";
 import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
+import { Ephemeral } from "../lib/response";
 
 let poke = makeCommand(
   {
@@ -24,12 +25,12 @@ let poke = makeCommand(
       user2ID: creditorId,
     });
 
-    if (overall_tab == undefined) {
-      throw new Error("no iowe available");
+    if (overall_tab === undefined) {
+      return Ephemeral(`There is no tab between ${caller.username} and ${user.username}`)
     }
 
     if (overall_tab > 0)
-      return `${caller.username} you owe ${user.username} £${overall_tab}`;
+      return Ephemeral(`${caller.username} you owe ${user.username} £${overall_tab}`);
     else
       return `${user} pay your tab of £${overall_tab * -1} to ${
         caller.username

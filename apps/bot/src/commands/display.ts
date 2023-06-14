@@ -22,14 +22,13 @@ export default makeCommand(
       user1ID: debtorId,
       user2ID: creditorId,
     });
-    if (debt == undefined) {
-      return `You and ${user.username} are squared up`;
+    if (debt !== undefined) {
+
+      if (debt > 0) return `You owe ${user.username} £${debt}`;
+
+      if (debt < 0) return `${user.username} owes you £${debt * -1}`;
+
     }
-
-    if (debt > 0) return `You owe ${user.username} £${debt}`;
-
-    if (debt < 0) return `${user.username} owes you £${debt * -1}`;
-
     return `You and ${user.username} are squared up`;
   }
 );
