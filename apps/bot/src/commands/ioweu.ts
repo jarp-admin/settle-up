@@ -27,6 +27,7 @@ let ioweu = makeCommand(
       debtorID: debtorId,
       creditorID: creditorId,
     });
+    
     if (updatedTab == undefined) {
       throw new Error("no cannot update tab");
     }

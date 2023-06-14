@@ -17,6 +17,7 @@ const leaderboard = makeCommand(
       }),
     },
   },
+  
   async (caller, { type }) => {
     let leaderboard;
 

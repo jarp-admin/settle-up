@@ -21,6 +21,7 @@ let uoweme = makeCommand(
       }),
     },
   },
+  
   async (caller, { payer, payment }) => {
     let payment_amount = parseFloat(payment);
 
