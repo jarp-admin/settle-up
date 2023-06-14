@@ -4,7 +4,7 @@ import makeCommand from "../lib/makeCommand";
 import { StringOption, UserOption } from "../lib/options";
 
 import trpc from "../trpc";
-import { Button, Message } from "../lib/response";
+import { Button, Ephemeral, Message } from "../lib/response";
 
 let uoweme = makeCommand(
   {
@@ -21,7 +21,7 @@ let uoweme = makeCommand(
       }),
     },
   },
-  
+
   async (caller, { payer, payment }) => {
     let payment_amount = parseFloat(payment);
 
@@ -42,15 +42,9 @@ let uoweme = makeCommand(
       throw new Error("No creditor selected");
     }
 
-    // TODO refactor with R2R
     let buttonHandler = async (i: ButtonInteraction<CacheType>) => {
-      if (i.user != payer) {
-        await i.reply({
-          content: "Only the payer can accept the payment",
-          ephemeral: true,
-        });
-        return;
-      }
+      if (i.user != payer)
+        return Ephemeral("Only the payer can accept the payment");
 
       await i.deferUpdate();
 
@@ -59,17 +53,14 @@ let uoweme = makeCommand(
         debtorID: debtorId,
         creditorID: creditorId,
       });
-      if (updatedTab == undefined) {
-        throw new Error("no cannot update tab");
-      }
+      if (updatedTab == undefined)
+        return Ephemeral("No tab to update and unable to create new tab");
 
       let overall_tab = await trpc.tab.getTab.query({
         user1ID: debtorId,
         user2ID: creditorId,
       });
-      if (overall_tab == undefined) {
-        throw new Error("cannot get overall tab");
-      }
+      if (overall_tab == undefined) return Ephemeral("Unable to get tab");
 
       let x = `Added £${payment_amount} to ${payer.username}'s tab with ${caller.username}. `;
       let Response = "";
@@ -81,7 +72,8 @@ let uoweme = makeCommand(
       } else {
         Response = x + `You and ${caller.username} are squared up`;
       }
-      await i.editReply({ content: Response, components: [] });
+      await i.editReply({ components: [] });
+      return Response;
     };
 
     return Message(
