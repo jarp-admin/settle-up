@@ -21,38 +21,32 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  debts             Tab[]       @relation("DebtorTab")
-  credits           Tab[]       @relation("CreditorTab")
-  debtorTabAction   TabAction[] @relation("DebtorTabAction")
-  creditorTabAction TabAction[] @relation("CreditorTabAction")
+  tabA Tab[] @relation("userA")
+  tabB Tab[] @relation("userB")
 }
 
 model Tab {
-  amount     Float
-  settled    Boolean @default(false)
-  debtor     User    @relation("DebtorTab", fields: [debtorID], references: [id])
-  creditor   User    @relation("CreditorTab", fields: [creditorID], references: [id])
-  debtorID   String // owes money     (from)
-  creditorID String // is owed money  (to)
+  userA_ID     String
+  userB_ID     String
+  userA        User          @relation("userA", fields: [userA_ID], references: [id])
+  userB        User          @relation("userB", fields: [userB_ID], references: [id])
+  amountOwed   Float
+  transactions Transaction[]
 
-  @@id([debtorID, creditorID])
-  @@unique([debtorID, creditorID])
-  @@index([debtorID])
-  @@index([creditorID])
+  @@id([userA_ID, userB_ID])
+  @@index([userB_ID])
+  @@index([userA_ID])
 }
 
-model TabAction {
-  tabActionID String   @id @default(cuid())
+model Transaction {
+  ID          String   @id @default(cuid())
   amount      Float
-  date        DateTime @default(now())
-  debtor      User     @relation("DebtorTabAction", fields: [debtorID], references: [id])
-  creditor    User     @relation("CreditorTabAction", fields: [creditorID], references: [id])
-  debtorID    String // owes money     (from)
-  creditorID  String // is owed money  (to)
+  dateSettled DateTime
+  tab         Tab      @relation(fields: [tabUserA_ID, tabUserB_ID], references: [userA_ID, userB_ID])
+  tabUserA_ID String
+  tabUserB_ID String
 
-  @@index([debtorID])
-  @@index([creditorID])
-  @@map("TabAction")
+  @@index([tabUserA_ID, tabUserB_ID])
 }
 
 // Necessary for Next auth
