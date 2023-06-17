@@ -1,21 +1,17 @@
 import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { api } from "~/trpc";
 
 const Profile: NextPage = () => {
   const { data: session } = useSession();
   const [email, setEmail] = useState("");
 
-  const { mutate } = api.user.updatePaypalEmail.useMutation();
+  const { mutate } = api.paypal.updatePaypalEmail.useMutation();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
-
-  useEffect(() => {
-    console.log(email);
-  }, [email]);
 
   const id = session?.user.id;
 
@@ -42,7 +38,7 @@ const Profile: NextPage = () => {
           className="btn-accent btn"
           onClick={() =>
             mutate({
-              userId: id,
+              userID: id,
               paypalEmail: email,
             })
           }
