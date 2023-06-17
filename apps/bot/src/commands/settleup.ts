@@ -16,6 +16,7 @@ let settleup = makeCommand(
       }),
     },
   },
+  
   async (caller, { user }) => {
     const { debtorId, creditorId } = await getIds(caller, user);
 

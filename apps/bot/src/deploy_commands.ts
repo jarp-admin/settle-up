@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import env from "env";
 import { commands } from "./command_registry";
 import deploy from "./lib/deploy";
