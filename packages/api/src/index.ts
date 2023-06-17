@@ -1,8 +1,6 @@
-import { paymentRouter } from "./routers/payment";
-import { tabRouter } from "./routers/tab";
-import { userRouter } from "./routers/user";
+import { paypalRouter } from "./routers/paypal";
+import { discordRouter } from "./routers/discord";
 import { createTRPCRouter } from "./trpc";
-import { leaderboardRouter } from "./routers/leaderboard";
 import { prisma } from "./db";
 
 export const createTRPCContext = async () => {
@@ -12,10 +10,8 @@ export const createTRPCContext = async () => {
 };
 
 export const appRouter = createTRPCRouter({
-  tab: tabRouter,
-  payment: paymentRouter,
-  user: userRouter,
-  leaderboard: leaderboardRouter,
+  discord: discordRouter,
+  paypal: paypalRouter,
 });
 
 export type AppRouter = typeof appRouter;
