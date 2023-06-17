@@ -24,7 +24,6 @@ const required = z.object({
   API_PORT: z.coerce.number(),
 
   // for discord
-  DISCORD_DEV_GUILD_ID: z.string().nonempty(),
   DISCORD_CLIENT_ID: z.string().nonempty(),
   DISCORD_CLIENT_TOKEN: z.string().nonempty(),
   DISCORD_CLIENT_SECRET: z.string().nonempty(),
