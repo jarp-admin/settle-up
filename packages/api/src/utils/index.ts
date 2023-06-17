@@ -1,2 +1,3 @@
-export { default as getDateDiff } from "./dateDiff";
-export { default as generatePaypalLink } from "./payments";
+export { default as generatePaypalLink } from "./generatePaypalLink";
+export { default as getUserFromDiscordID } from "./getUserFromDiscordID";
+export { default as sorted } from "./sorted";
