@@ -33,16 +33,16 @@ model Tab {
   amountOwed   Float
   transactions Transaction[]
 
-  @@id([userA_ID, userB_ID])
+  @@id([userA_ID, userB_ID], name: "id")
   @@index([userB_ID])
   @@index([userA_ID])
 }
 
 model Transaction {
-  ID          String   @id @default(cuid())
+  ID          String    @id @default(cuid())
   amount      Float
-  dateSettled DateTime
-  tab         Tab      @relation(fields: [tabUserA_ID, tabUserB_ID], references: [userA_ID, userB_ID])
+  dateSettled DateTime?
+  tab         Tab       @relation(fields: [tabUserA_ID, tabUserB_ID], references: [userA_ID, userB_ID])
   tabUserA_ID String
   tabUserB_ID String
 
