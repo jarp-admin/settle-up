@@ -7,28 +7,29 @@ import trpc from "../trpc";
 let settleup = makeCommand(
   {
     name: "settleup",
-    description: "Generate a link to pay someone",
+    description: "Generates a link to pay someone",
     options: {
-      user: UserOption({
-        description: "user to ping",
+      target: UserOption({
+        description: "Person to settle up with",
         required: true,
       }),
     },
   },
 
-  async (caller, { user }) => {
-    if (caller === user) return Ephemeral("You can't settle up with yourself");
+  async (caller, { target }) => {
+    if (caller === target)
+      return Ephemeral("You can't settle up with yourself");
 
     const { link, amount, recipientID } =
       await trpc.paypal.getDiscordLink.query({
         callerID: caller.id,
-        targetID: user.id,
+        targetID: target.id,
       });
 
     let [payer, receiver] =
       caller.id === recipientID
-        ? ([user, caller] as const)
-        : ([caller, user] as const);
+        ? ([target, caller] as const)
+        : ([caller, target] as const);
 
     return Message(
       `${payer}, please pay £${Math.abs(
@@ -55,11 +56,11 @@ let settleup = makeCommand(
 
                 const _clearedTab = await trpc.discord.clear.mutate({
                   user1ID: caller.id,
-                  user2ID: user.id,
+                  user2ID: target.id,
                 });
 
                 await i.editReply({ components: [] });
-                return `${payer}, ${receiver} You're all settled up!`;
+                return `${payer}, ${receiver} you're all settled up`;
               },
             }),
           ],

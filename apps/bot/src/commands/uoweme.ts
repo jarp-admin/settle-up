@@ -7,22 +7,22 @@ import trpc from "../trpc";
 let uoweme = makeCommand(
   {
     name: "uoweme",
-    description: "Add to a persons outstanding tab with you",
+    description: "Adds to your tab with another person",
     options: {
-      user: UserOption({
-        description: "user who owes you",
+      target: UserOption({
+        description: "Person who owes you",
         required: true,
       }),
       payment: StringOption({
-        description: "amount to owe",
+        description: "Amount they owe",
         required: true,
       }),
     },
   },
 
-  async (caller, { user, payment }) => {
+  async (caller, { target, payment }) => {
     return Message(
-      `Hey ${user}, ${caller.username} wants you to pay £${payment}. Is this OK?`,
+      `${target}, ${caller.username} wants you to pay £${payment}. Is this OK?`,
       {
         components: {
           row1: [
@@ -30,14 +30,16 @@ let uoweme = makeCommand(
               label: "yes",
               style: "danger",
               onClick: async (i) => {
-                if (i.user != user)
-                  return Ephemeral("Only the payer can accept the debt");
+                if (i.user != target)
+                  return Ephemeral(
+                    `Only the ${target.username} can accept the debt`
+                  );
 
                 await i.deferUpdate();
 
                 let tabAmount = await trpc.discord.addToOrCreate.mutate({
                   amount: parseFloat(payment),
-                  debtorID: user.id,
+                  debtorID: target.id,
                   creditorID: caller.id,
                 });
 
@@ -45,12 +47,14 @@ let uoweme = makeCommand(
 
                 let details =
                   tabAmount === 0
-                    ? `You and ${caller.username} are squared up`
+                    ? `${target.username} and ${caller.username} are settled up`
                     : tabAmount > 0
-                    ? `You owe ${caller.username} £${tabAmount}`
-                    : `${caller.username} owes you £${tabAmount * -1}`;
+                    ? `${target.username} owes ${caller.username} £${tabAmount}`
+                    : `${caller.username} owes ${target.username} £${
+                        tabAmount * -1
+                      }`;
 
-                return `Added £${payment} to ${user.username}'s tab with ${caller.username}. ${details}`;
+                return `Added £${payment} to ${target.username}'s tab with ${caller}. ${details}`;
               },
             }),
           ],
