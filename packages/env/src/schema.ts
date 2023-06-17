@@ -11,7 +11,13 @@ const required = z.object({
   NEXTAUTH_URL: z.string().url(),
 
   // database:
-  DATABASE_URL: z.string().url().nonempty(),
+  POSTGRES_URL: z.string().nonempty(),
+  POSTGRES_PRISMA_URL: z.string().nonempty(),
+  POSTGRES_URL_NON_POOLING: z.string().nonempty(),
+  POSTGRES_USER: z.string().nonempty(),
+  POSTGRES_HOST: z.string().nonempty(),
+  POSTGRES_PASSWORD: z.string().nonempty(),
+  POSTGRES_DATABASE: z.string().nonempty(),
 
   // for tRPC router
   API_HOST: z.string().nonempty(),
