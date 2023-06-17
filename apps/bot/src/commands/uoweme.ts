@@ -1,17 +1,15 @@
-import { ButtonInteraction, ButtonStyle, CacheType } from "discord.js";
-
 import makeCommand from "../lib/makeCommand";
 import { StringOption, UserOption } from "../lib/options";
 
-import trpc from "../trpc";
 import { Button, Ephemeral, Message } from "../lib/response";
+import trpc from "../trpc";
 
 let uoweme = makeCommand(
   {
     name: "uoweme",
     description: "Add to a persons outstanding tab with you",
     options: {
-      payer: UserOption({
+      user: UserOption({
         description: "user who owes you",
         required: true,
       }),
@@ -22,69 +20,38 @@ let uoweme = makeCommand(
     },
   },
 
-  async (caller, { payer, payment }) => {
-    let payment_amount = parseFloat(payment);
-
-    if (payment_amount <= 0) return "You can't input a negative number";
-
-    const debtorId = await trpc.user.getUserId.query({
-      discordId: payer.id,
-    });
-
-    if (debtorId == undefined) {
-      throw new Error("No debtor selected");
-    }
-
-    const creditorId = await trpc.user.getUserId.query({
-      discordId: caller.id,
-    });
-    if (creditorId == undefined) {
-      throw new Error("No creditor selected");
-    }
-
-    let buttonHandler = async (i: ButtonInteraction<CacheType>) => {
-      if (i.user != payer)
-        return Ephemeral("Only the payer can accept the payment");
-
-      await i.deferUpdate();
-
-      let updatedTab = await trpc.tab.addToOrCreate.mutate({
-        amount: parseFloat(String(payment_amount)),
-        debtorID: debtorId,
-        creditorID: creditorId,
-      });
-      if (updatedTab == undefined)
-        return Ephemeral("No tab to update and unable to create new tab");
-
-      let overall_tab = await trpc.tab.getTab.query({
-        user1ID: debtorId,
-        user2ID: creditorId,
-      });
-      if (overall_tab == undefined) return Ephemeral("Unable to get tab");
-
-      let x = `Added £${payment_amount} to ${payer.username}'s tab with ${caller.username}. `;
-      let Response = "";
-      if (overall_tab > 0) {
-        Response = x + `You owe ${caller.username} £${overall_tab}`;
-      } else if (overall_tab < 0) {
-        overall_tab = overall_tab * -1;
-        Response = x + `${caller.username} owes you £${overall_tab}`;
-      } else {
-        Response = x + `You and ${caller.username} are squared up`;
-      }
-      await i.editReply({ components: [] });
-      return Response;
-    };
-
+  async (caller, { user, payment }) => {
     return Message(
-      `Hey ${payer}, ${caller.username} wants you to pay £${payment_amount}. Is this OK?`,
+      `Hey ${user}, ${caller.username} wants you to pay £${payment}. Is this OK?`,
       {
         components: {
           row1: [
             Button({
               label: "yes",
               style: "danger",
-              onClick: buttonHandler,
+              onClick: async (i) => {
+                if (i.user != user)
+                  return Ephemeral("Only the payer can accept the debt");
+
+                await i.deferUpdate();
+
+                let tabAmount = await trpc.discord.addToOrCreate.mutate({
+                  amount: parseFloat(payment),
+                  debtorID: user.id,
+                  creditorID: caller.id,
+                });
+
+                await i.editReply({ components: [] });
+
+                let details =
+                  tabAmount === 0
+                    ? `You and ${caller.username} are squared up`
+                    : tabAmount > 0
+                    ? `You owe ${caller.username} £${tabAmount}`
+                    : `${caller.username} owes you £${tabAmount * -1}`;
+
+                return `Added £${payment} to ${user.username}'s tab with ${caller.username}. ${details}`;
+              },
             }),
           ],
         },

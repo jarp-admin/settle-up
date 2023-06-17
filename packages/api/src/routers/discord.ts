@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { getUserFromDiscordID, sorted } from "../utils";
 
 export const discordRouter = createTRPCRouter({
-  getTab: publicProcedure
+  getTabAmount: publicProcedure
     .input(
       z.object({
         user1ID: z.string(),

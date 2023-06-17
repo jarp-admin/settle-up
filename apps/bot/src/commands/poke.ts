@@ -1,9 +1,8 @@
 import makeCommand from "../lib/makeCommand";
 import { UserOption } from "../lib/options";
-import { getIds } from "../utils/getIds";
 
-import trpc from "../trpc";
 import { Ephemeral } from "../lib/response";
+import trpc from "../trpc";
 
 let poke = makeCommand(
   {
@@ -16,25 +15,18 @@ let poke = makeCommand(
       }),
     },
   },
-  
-  async (caller, { user }) => {
-    const { debtorId, creditorId } = await getIds(caller, user);
 
-    let overall_tab = await trpc.tab.getTab.query({
-      user1ID: debtorId,
-      user2ID: creditorId,
+  async (caller, { user }) => {
+    let tabAmount = await trpc.discord.getTabAmount.query({
+      user1ID: caller.id,
+      user2ID: user.id,
     });
 
-    if (overall_tab === undefined) {
-      return Ephemeral(`There is no tab between ${caller.username} and ${user.username}`)
-    }
-
-    if (overall_tab > 0)
-      return Ephemeral(`${caller.username} you owe ${user.username} £${overall_tab}`);
-    else
-      return `${user} pay your tab of £${overall_tab * -1} to ${
-        caller.username
-      }`;
+    return tabAmount === 0
+      ? Ephemeral(`You and ${user.username} are settled up`)
+      : tabAmount > 0
+      ? Ephemeral(`${caller.username} you owe ${user.username} £${tabAmount}`)
+      : `${user} pay your tab of £${tabAmount * -1} to ${caller.username}`;
   }
 );
 

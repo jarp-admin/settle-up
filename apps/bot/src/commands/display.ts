@@ -1,6 +1,5 @@
 import makeCommand from "../lib/makeCommand";
 import { UserOption } from "../lib/options";
-import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
 
@@ -16,19 +15,15 @@ export default makeCommand(
     },
   },
   async (caller, { user }) => {
-    const { debtorId, creditorId } = await getIds(caller, user);
-
-    let debt = await trpc.tab.getTab.query({
-      user1ID: debtorId,
-      user2ID: creditorId,
+    let tabAmount = await trpc.discord.getTabAmount.query({
+      user1ID: caller.id,
+      user2ID: user.id,
     });
-    if (debt !== undefined) {
 
-      if (debt > 0) return `You owe ${user.username} £${debt}`;
-
-      if (debt < 0) return `${user.username} owes you £${debt * -1}`;
-
-    }
-    return `You and ${user.username} are squared up`;
+    return tabAmount === 0
+      ? `You and ${user.username} are settled up`
+      : tabAmount > 0
+      ? `You owe ${user.username} £${tabAmount}`
+      : `${user.username} owes you £${tabAmount * -1}`;
   }
 );

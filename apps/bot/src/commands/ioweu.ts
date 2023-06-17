@@ -1,6 +1,5 @@
 import makeCommand from "../lib/makeCommand";
 import { StringOption, UserOption } from "../lib/options";
-import { getIds } from "../utils/getIds";
 
 import trpc from "../trpc";
 
@@ -20,35 +19,20 @@ let ioweu = makeCommand(
     },
   },
   async (caller, { user, payment }) => {
-    const { debtorId, creditorId } = await getIds(caller, user);
-
-    let updatedTab = await trpc.tab.addToOrCreate.mutate({
+    let tabAmount = await trpc.discord.addToOrCreate.mutate({
       amount: parseFloat(payment),
-      debtorID: debtorId,
-      creditorID: creditorId,
+      debtorID: caller.id,
+      creditorID: user.id,
     });
-    
-    if (updatedTab == undefined) {
-      throw new Error("no cannot update tab");
-    }
 
-    let overall_tab = await trpc.tab.getTab.query({
-      user1ID: debtorId,
-      user2ID: creditorId,
-    });
-    if (overall_tab == undefined) {
-      throw new Error("no iowe available");
-    }
+    let details =
+      tabAmount === 0
+        ? `You and ${user.username} are settled up`
+        : tabAmount > 0
+        ? `You owe ${user.username} £${tabAmount}`
+        : `${user.username} owes you £${tabAmount * -1}`;
 
-    let base = `Added £${payment} to ${caller.username}'s tab with ${user.username}. `;
-
-    if (overall_tab > 0)
-      return base + `You owe ${user.username} £${overall_tab}`;
-
-    if (overall_tab < 0)
-      return base + `${user.username} owes you £${overall_tab * -1}`;
-
-    return base + `You and ${user.username} are squared up`;
+    return `Added £${payment} to ${caller.username}'s tab with ${user.username}. ${details}`;
   }
 );
 
