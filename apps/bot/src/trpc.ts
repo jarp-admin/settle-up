@@ -8,7 +8,7 @@ import type { AppRouter } from "api";
 const trpc = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: `http://${env.API_HOST}:${env.API_PORT}/api/trpc`,
+      url: `${env.API_HOST}/api/trpc`,
       fetch,
     }),
   ],
