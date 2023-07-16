@@ -21,7 +21,6 @@ const required = z.object({
 
   // for tRPC router
   API_HOST: z.string().nonempty(),
-  API_PORT: z.coerce.number(),
 
   // for discord
   DISCORD_CLIENT_ID: z.string().nonempty(),
